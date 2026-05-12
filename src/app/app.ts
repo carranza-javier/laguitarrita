@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { HeroComponent } from './components/hero/hero.component';
 import { AboutComponent } from './components/about/about.component';
@@ -20,4 +20,8 @@ import { ContactComponent } from './components/contact/contact.component';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {}
+export class App implements AfterViewInit {
+  ngAfterViewInit(): void {
+    setTimeout(() => window.scrollTo({ top: 80, behavior: 'instant' }), 0);
+  }
+}

@@ -19,7 +19,7 @@ export class HeroComponent {
   protected readonly muted = signal(true);
 
   protected readonly videoUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-    'https://www.youtube.com/embed/SBVo-4SSr2w?autoplay=1&mute=1&loop=1&playlist=SBVo-4SSr2w&controls=0&rel=0&modestbranding=1&enablejsapi=1'
+    'https://www.youtube.com/embed/izzAVi_uaIs?autoplay=1&mute=1&loop=1&playlist=izzAVi_uaIs&controls=0&rel=0&modestbranding=1&enablejsapi=1'
   );
 
   toggleMute(): void {

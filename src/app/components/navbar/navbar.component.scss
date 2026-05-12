@@ -4,12 +4,29 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(240, 239, 237, 0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   height: var(--navbar-height);
   padding: 0 24px;
   box-shadow: none;
+  background: rgba(240, 239, 237, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  animation: navbar-fade-out 3.5s ease-in 2s forwards;
+
+  &.scrolled {
+    animation: none;
+    background: rgba(240, 239, 237, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+  }
+}
+
+@keyframes navbar-fade-out {
+  to {
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom-color: transparent;
+  }
 }
 
 .logo {
@@ -20,6 +37,17 @@
   cursor: pointer;
   letter-spacing: 0.01em;
   user-select: none;
+  animation: logo-to-white 3.5s ease-in 2s forwards;
+
+  .navbar.scrolled & {
+    animation: none;
+    color: var(--accent) !important;
+    transition: color 0.3s ease;
+  }
+}
+
+@keyframes logo-to-white {
+  to { color: #fff; }
 }
 
 .spacer {
@@ -37,7 +65,18 @@
     font-weight: 400;
     color: var(--text);
     letter-spacing: 0.02em;
+    animation: navbtn-to-white 3.5s ease-in 2s forwards;
+
+    .navbar.scrolled & {
+      animation: none;
+      color: var(--text) !important;
+      transition: color 0.3s ease;
+    }
   }
+}
+
+@keyframes navbtn-to-white {
+  to { color: rgba(255, 255, 255, 0.9); }
 }
 
 .lang-toggle {
@@ -46,6 +85,17 @@
   letter-spacing: 0.08em;
   color: var(--text-muted);
   min-width: 40px;
+  animation: langtoggle-to-white 3.5s ease-in 2s forwards;
+
+  .navbar.scrolled & {
+    animation: none;
+    color: var(--text-muted) !important;
+    transition: color 0.3s ease;
+  }
+}
+
+@keyframes langtoggle-to-white {
+  to { color: rgba(255, 255, 255, 0.75); }
 }
 
 .menu-btn {

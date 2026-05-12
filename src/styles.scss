@@ -70,6 +70,7 @@ a {
 section:not(#hero) {
   padding-top: 80px;
   padding-bottom: 80px;
+  scroll-margin-top: var(--navbar-height);
 }
 
 .section-heading {

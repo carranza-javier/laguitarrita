@@ -22,7 +22,7 @@ const TRANSLATIONS = {
     classes: {
       heading: 'Unterricht',
       items: [
-        { icon: 'music_note', title: 'Flamenco Gitarre & Spanische Gitarre', desc: 'Beide Stile, auch kombiniert – je nach deinen Zielen und Interessen.' },
+        { icon: 'music_note', title: 'Flamenco-Gitarre', desc: 'Je nach deinen Zielen und Interessen.' },
         { icon: 'people', title: 'Alle Niveaus und Altersgruppen', desc: 'Anfänger sind herzlich willkommen. Kinder, Jugendliche, Erwachsene.' },
         { icon: 'fitness_center', title: 'Praxisorientiert', desc: 'Viele Übungen und konkreter Fortschritt.' },
         { icon: 'home', title: 'Präsenz oder Online', desc: 'Ich komme zu dir nach Bern. Oder online – wie es dir am besten passt.' },
@@ -72,7 +72,7 @@ const TRANSLATIONS = {
     classes: {
       heading: 'Classes',
       items: [
-        { icon: 'music_note', title: 'Flamenco Guitar & Spanish Guitar', desc: 'Both styles, or combined — depending on your goals and interests.' },
+        { icon: 'music_note', title: 'Flamenco Guitar', desc: 'Tailored to your goals and interests.' },
         { icon: 'people', title: 'All levels and ages', desc: 'Beginners very welcome. Children, teens, adults.' },
         { icon: 'fitness_center', title: 'Practical approach', desc: 'Lots of exercises and real progress.' },
         { icon: 'home', title: 'In-person or online', desc: 'I come to you in Bern. Or online — whatever works best for you.' },

@@ -12,7 +12,7 @@ const TRANSLATIONS = {
     },
     hero: {
       name: 'Javier Carranza',
-      tagline: 'Flamenco Gitarre & Spanische Gitarre in Bern',
+      tagline: 'Flamenco-Gitarrenlehrer in Bern',
       sub: 'Für alle Niveaus und Altersgruppen',
     },
     about: {
@@ -62,7 +62,7 @@ const TRANSLATIONS = {
     },
     hero: {
       name: 'Javier Carranza',
-      tagline: 'Flamenco Guitar & Spanish Guitar in Bern',
+      tagline: 'Flamenco Guitar Teacher in Bern',
       sub: 'For all levels and ages',
     },
     about: {

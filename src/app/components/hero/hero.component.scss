@@ -21,6 +21,8 @@
   border: none;
   pointer-events: none;
   filter: contrast(1.08) brightness(0.95);
+  opacity: 0;
+  animation: video-reveal 1.5s ease-in 2s forwards;
 }
 
 /* Viñeta radial — funde el fondo blanco a negro en los bordes */
@@ -41,6 +43,10 @@
   text-align: center;
   padding: 24px;
   color: #fff;
+  opacity: 0;
+  animation:
+    content-show 1.2s ease-out 0.3s forwards,
+    content-hide 1s ease-in 2.5s forwards;
 }
 
 .hero-name {
@@ -108,5 +114,19 @@
 @keyframes bounce {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50% { transform: translateX(-50%) translateY(6px); }
+}
+
+@keyframes video-reveal {
+  to { opacity: 0.85; }
+}
+
+@keyframes content-show {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes content-hide {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 

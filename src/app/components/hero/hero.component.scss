@@ -23,13 +23,16 @@
   filter: contrast(1.08) brightness(0.95);
 }
 
-/* Viñeta radial + franja superior que tapa la info de YouTube */
+/* Viñeta radial — funde el fondo blanco a negro en los bordes */
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.72) 0%, transparent 12%),
-    radial-gradient(ellipse 70% 70% at center, transparent 35%, rgba(0, 0, 0, 0.55) 75%, rgba(0, 0, 0, 0.88) 100%);
+  background: radial-gradient(
+    ellipse 70% 70% at center,
+    transparent 35%,
+    rgba(0, 0, 0, 0.55) 75%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
 }
 
 .hero-content {

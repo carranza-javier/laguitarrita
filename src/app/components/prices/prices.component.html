@@ -1,0 +1,29 @@
+<div class="container">
+  <h2 class="section-heading">{{ t().prices.heading }}</h2>
+
+  <table class="prices-table">
+    <thead>
+      <tr>
+        <th>{{ t().prices.col1 }}</th>
+        <th>{{ t().prices.col2 }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of t().prices.rows; track row.label) {
+        <tr>
+          <td>{{ row.label }}</td>
+          <td class="price-cell">{{ row.price }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <ul class="prices-notes">
+    @for (note of t().prices.notes; track note) {
+      <li>
+        <mat-icon class="note-icon">info_outline</mat-icon>
+        <span>{{ note }}</span>
+      </li>
+    }
+  </ul>
+</div>

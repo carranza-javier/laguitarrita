@@ -1,0 +1,11 @@
+<div class="container">
+  <h2 class="section-heading">{{ t().about.heading }}</h2>
+  <div class="about-layout">
+    <div class="about-text">
+      @for (paragraph of t().about.body.split('\n'); track $index) {
+        <p>{{ paragraph }}</p>
+      }
+    </div>
+    <img class="about-photo" src="assets/javier.jpg" alt="Javier Carranza">
+  </div>
+</div>

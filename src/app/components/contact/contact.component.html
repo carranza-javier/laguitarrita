@@ -1,0 +1,22 @@
+<div class="container">
+  <h2 class="section-heading">{{ t().contact.heading }}</h2>
+  <p class="contact-intro">{{ t().contact.intro }}</p>
+
+  <div class="contact-items">
+    <a class="contact-item" href="mailto:javier@laguitarrita.ch">
+      <mat-icon>email</mat-icon>
+      <div>
+        <span class="contact-label">{{ t().contact.emailLabel }}</span>
+        <span class="contact-value">javier&#64;laguitarrita.ch</span>
+      </div>
+    </a>
+
+    <div class="contact-item contact-item--phone">
+      <mat-icon>phone</mat-icon>
+      <div>
+        <span class="contact-label">{{ t().contact.phoneLabel }}</span>
+        <span class="contact-value contact-value--muted">{{ t().contact.phone }}</span>
+      </div>
+    </div>
+  </div>
+</div>

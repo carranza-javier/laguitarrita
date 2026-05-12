@@ -1,0 +1,12 @@
+<div class="container">
+  <h2 class="section-heading">{{ t().classes.heading }}</h2>
+  <div class="classes-grid">
+    @for (item of t().classes.items; track item.title) {
+      <div class="class-item">
+        <mat-icon class="class-icon">{{ item.icon }}</mat-icon>
+        <h3 class="class-title">{{ item.title }}</h3>
+        <p class="class-desc">{{ item.desc }}</p>
+      </div>
+    }
+  </div>
+</div>

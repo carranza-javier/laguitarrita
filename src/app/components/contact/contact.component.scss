@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+.contact-intro {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin: 0 0 2.5rem;
+}
+
+.contact-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: var(--text);
+
+  mat-icon {
+    color: var(--accent);
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+.contact-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.contact-value {
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--text);
+
+  &--muted {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+}
+
+a.contact-item:hover .contact-value {
+  color: var(--accent);
+}

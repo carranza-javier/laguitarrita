@@ -1,0 +1,51 @@
+:host {
+  display: block;
+}
+
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 540px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.class-item {
+  background: var(--bg);
+  padding: 32px 28px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #fff;
+  }
+}
+
+.class-icon {
+  color: var(--accent);
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.class-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.class-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+}

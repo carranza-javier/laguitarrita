@@ -1,0 +1,30 @@
+<section class="hero">
+  <iframe
+    #heroIframe
+    class="hero-video"
+    [src]="videoUrl"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    title="Hero background video">
+  </iframe>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <h1 class="hero-name">{{ t().hero.name }}</h1>
+    <p class="hero-tagline">{{ t().hero.tagline }}</p>
+    <p class="hero-sub">{{ t().hero.sub }}</p>
+  </div>
+
+  <button
+    mat-icon-button
+    class="mute-btn"
+    (click)="toggleMute()"
+    [attr.aria-label]="muted() ? 'Ton einschalten' : 'Ton ausschalten'">
+    <mat-icon>{{ muted() ? 'volume_off' : 'volume_up' }}</mat-icon>
+  </button>
+
+  <button class="scroll-hint" (click)="scrollToAbout()" aria-label="Scroll down">
+    <mat-icon>keyboard_arrow_down</mat-icon>
+  </button>
+</section>

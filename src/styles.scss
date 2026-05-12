@@ -1,0 +1,86 @@
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+
+  @include mat.theme((
+    color: (
+      primary: mat.$orange-palette,
+      tertiary: mat.$red-palette,
+    ),
+    typography: Inter,
+    density: 0,
+  ));
+
+  // Design tokens
+  --bg: #f0efed;
+  --text: #1a1a1a;
+  --text-muted: #666;
+  --accent: #c0634a;
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --navbar-height: 64px;
+  --container-width: 880px;
+  --section-pad: 96px 24px;
+
+  // Override Material surface colors to match our palette
+  --mat-sys-surface: #f0efed;
+  --mat-sys-background: #f0efed;
+  --mat-sys-on-surface: #1a1a1a;
+  --mat-sys-primary: #c0634a;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #ffd9cf;
+  --mat-sys-on-primary-container: #3e0f05;
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  height: 100%;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+section:not(#hero) {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.section-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: var(--text);
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 600px) {
+  :root {
+    --section-pad: 64px 20px;
+  }
+}

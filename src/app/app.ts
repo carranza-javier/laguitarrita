@@ -22,6 +22,9 @@ import { ContactComponent } from './components/contact/contact.component';
 })
 export class App implements AfterViewInit {
   ngAfterViewInit(): void {
-    setTimeout(() => window.scrollTo({ top: 80, behavior: 'instant' }), 0);
+    const applyScroll = () => window.scrollTo({ top: 80, behavior: 'instant' });
+    setTimeout(applyScroll, 0);
+    setTimeout(applyScroll, 300);
+    setTimeout(applyScroll, 800);
   }
 }

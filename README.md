@@ -1,6 +1,6 @@
 # laguitarrita.ch
 
-Personal website for Javier Carranza, Spanish and Flamenco guitar teacher in Bern, Switzerland.
+Personal website for Javier Carranza, Flamenco guitar teacher in Bern, Switzerland.
 
 ## Stack
 - **Frontend**: Angular (static build, deployed on GitHub Pages)
@@ -33,7 +33,7 @@ Single page app (one-pager), sections in order:
 
 ### 1. Hero
 - Video occupies almost the entire screen on entry
-- Overlay on top of the video: name **"Javier Carranza"** and tagline **"Spanische & Flamenco-Gitarre in Bern"**
+- Overlay on top of the video: name **"Javier Carranza"** and tagline **"Flamenco-Gitarre in Bern"**
 - Below the tagline, a short line: **"Für alle Niveaus und Altersgruppen"** / **"For all levels and ages"**
 - Autoplay, with sound, discrete mute/unmute button in one corner
 - Video: Javier playing guitar (to be recorded, horizontal format, white background)

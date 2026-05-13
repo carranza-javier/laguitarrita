@@ -35,7 +35,7 @@ const TRANSLATIONS = {
       col1: 'Angebot',
       col2: 'Preis',
       rows: [
-        { label: 'Einzelstunde', price: 'CHF 80' },
+        { label: 'Einzelstunde', price: 'CHF 80 / Std.' },
         { label: 'Monat Präsenz – 4 Stunden', price: 'CHF 280 (CHF 70/Std.)' },
         { label: 'Monat Online – 4 Stunden', price: 'CHF 240 (CHF 60/Std.)' },
       ],
@@ -85,7 +85,7 @@ const TRANSLATIONS = {
       col1: 'Option',
       col2: 'Price',
       rows: [
-        { label: 'Single class', price: 'CHF 80' },
+        { label: 'Single class', price: 'CHF 80 / h' },
         { label: 'Monthly in-person — 4 classes', price: 'CHF 280 (CHF 70/class)' },
         { label: 'Monthly online — 4 classes', price: 'CHF 240 (CHF 60/class)' },
       ],

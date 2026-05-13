@@ -101,6 +101,17 @@
 .menu-btn {
   display: none;
   color: var(--text);
+  animation: menubtn-to-white 3.5s ease-in 2s forwards;
+
+  .navbar.scrolled & {
+    animation: none;
+    color: var(--text) !important;
+    transition: color 0.3s ease;
+  }
+}
+
+@keyframes menubtn-to-white {
+  to { color: rgba(255, 255, 255, 0.9); }
 }
 
 @media (max-width: 640px) {

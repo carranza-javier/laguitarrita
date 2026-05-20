@@ -2,11 +2,12 @@
   <video
     #heroVideo
     class="hero-video"
+    [class.video-ready]="videoReady()"
     src="https://d1sv0wy23k5ghd.cloudfront.net/javigranaina.mp4"
     autoplay
-    muted
     loop
-    playsinline>
+    playsinline
+    (canplay)="onVideoReady()">
   </video>
 
   <div class="hero-overlay"></div>

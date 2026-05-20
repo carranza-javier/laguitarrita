@@ -19,7 +19,11 @@
   pointer-events: none;
   filter: contrast(1.08) brightness(0.95);
   opacity: 0;
-  animation: video-reveal 3.5s ease-in 2s forwards;
+  transition: opacity 2.5s ease-in;
+
+  &.video-ready {
+    opacity: 0.85;
+  }
 }
 
 /* Viñeta radial — funde el fondo blanco a negro en los bordes */
@@ -166,9 +170,7 @@
   50% { transform: translateX(-50%) translateY(6px); }
 }
 
-@keyframes video-reveal {
-  to { opacity: 0.85; }
-}
+
 
 @keyframes content-sequence {
   0%   { opacity: 0; transform: translateY(12px); }

@@ -17,16 +17,14 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
   protected readonly muted = signal(true);
   protected readonly showHint = signal(true);
   protected readonly hintFading = signal(false);
-  protected readonly videoReady = signal(false);
+  protected readonly showVideo = signal(false);
 
   private readonly hintFadeTimer = setTimeout(() => this.hintFading.set(true), 5000);
   private readonly hintTimer = setTimeout(() => this.showHint.set(false), 7000);
 
   ngAfterViewInit(): void {
     const video = this.videoRef?.nativeElement;
-    if (video) {
-      video.muted = true;
-    }
+    if (video) video.muted = true;
   }
 
   ngOnDestroy(): void {
@@ -34,8 +32,11 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
     clearTimeout(this.hintTimer);
   }
 
-  onVideoReady(): void {
-    this.videoReady.set(true);
+  onContentAnimationEnd(): void {
+    const video = this.videoRef?.nativeElement;
+    if (!video) return;
+    video.play();
+    this.showVideo.set(true);
   }
 
   toggleMute(): void {

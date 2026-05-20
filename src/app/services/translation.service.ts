@@ -31,6 +31,7 @@ const TRANSLATIONS = {
         { icon: 'language', title: 'Auf Deutsch, Englisch oder Spanisch', desc: 'Du wählst die Sprache, in der du dich am wohlsten fühlst.' },
         { icon: 'star', title: 'Erste Probestunde gratis', desc: '30 Minuten, kostenlos, ohne jede Verpflichtung.' },
       ],
+      note: 'Gitarrenunterricht auch in anderen Stilen: Pop, Rock, Singer-Songwriter und mehr. Frag einfach nach.',
     },
     prices: {
       heading: 'Preise',
@@ -83,6 +84,7 @@ const TRANSLATIONS = {
         { icon: 'language', title: 'In German, English or Spanish', desc: 'Choose whichever language you feel most comfortable in.' },
         { icon: 'star', title: 'First trial class free', desc: '30 minutes, no cost, no commitment.' },
       ],
+      note: 'Guitar lessons in other styles also available: Pop, Rock, Singer-Songwriter and more. Just ask.',
     },
     prices: {
       heading: 'Prices',

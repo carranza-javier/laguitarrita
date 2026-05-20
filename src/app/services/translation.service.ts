@@ -24,10 +24,10 @@ const TRANSLATIONS = {
     classes: {
       heading: 'Unterricht',
       items: [
-        { icon: 'music_note', title: 'Flamenco-Gitarre', desc: 'Je nach deinen Zielen und Interessen.' },
-        { icon: 'people', title: 'Alle Niveaus und Altersgruppen', desc: 'Anfänger sind herzlich willkommen. Kinder, Jugendliche, Erwachsene.' },
-        { icon: 'fitness_center', title: 'Praxisorientiert', desc: 'Viele Übungen und konkreter Fortschritt.' },
-        { icon: 'home', title: 'Präsenz oder Online', desc: 'Ich komme zu dir nach Bern. Oder online – wie es dir am besten passt.' },
+        { icon: 'music_note', title: 'Flamenco-Gitarre', desc: 'Massgeschneiderter Unterricht für deine Ziele.' },
+        { icon: 'people', title: 'Alle Niveaus und Altersgruppen', desc: 'Auch Anfänger sind herzlich willkommen. Kinder, Jugendliche, Erwachsene.' },
+        { icon: 'fitness_center', title: 'Praxisorientiert', desc: 'Stücke, Übungen und schnelle Fortschritte.' },
+        { icon: 'home', title: 'Präsenz oder Online', desc: 'Wenn du in Bern wohnst, komme ich gerne zu dir nach Hause. Oder online – wie es dir am besten passt.' },
         { icon: 'language', title: 'Auf Deutsch, Englisch oder Spanisch', desc: 'Du wählst die Sprache, in der du dich am wohlsten fühlst.' },
         { icon: 'star', title: 'Erste Probestunde gratis', desc: '30 Minuten, kostenlos, ohne jede Verpflichtung.' },
       ],
@@ -43,8 +43,8 @@ const TRANSLATIONS = {
       ],
       notes: [
         'Monatliche Schüler:innen erhalten nach jeder Stunde eine private Aufnahme zum Nachüben zu Hause.',
-        'Zahlung im Voraus per TWINT oder Banküberweisung.',
-        'Absage: 24 Stunden Voranmeldung erforderlich – sonst wird die Stunde verrechnet.',
+        'Zahlung per TWINT oder Banküberweisung.',
+        'Verschiebungen und Absagen müssen bis 24h im Voraus erfolgen.',
       ],
     },
     contact: {
@@ -76,10 +76,10 @@ const TRANSLATIONS = {
     classes: {
       heading: 'Classes',
       items: [
-        { icon: 'music_note', title: 'Flamenco Guitar', desc: 'Tailored to your goals and interests.' },
-        { icon: 'people', title: 'All levels and ages', desc: 'Beginners very welcome. Children, teens, adults.' },
-        { icon: 'fitness_center', title: 'Practical approach', desc: 'Lots of exercises and real progress.' },
-        { icon: 'home', title: 'In-person or online', desc: 'I come to you in Bern. Or online — whatever works best for you.' },
+        { icon: 'music_note', title: 'Flamenco Guitar', desc: 'Tailor-made lessons for your goals.' },
+        { icon: 'people', title: 'All levels and ages', desc: 'Beginners are also very welcome. Children, teens, adults.' },
+        { icon: 'fitness_center', title: 'Practical approach', desc: 'Pieces, exercises and quick progress.' },
+        { icon: 'home', title: 'In-person or online', desc: 'If you live in Bern, I am happy to come to your home. Or online — whatever works best for you.' },
         { icon: 'language', title: 'In German, English or Spanish', desc: 'Choose whichever language you feel most comfortable in.' },
         { icon: 'star', title: 'First trial class free', desc: '30 minutes, no cost, no commitment.' },
       ],
@@ -95,8 +95,8 @@ const TRANSLATIONS = {
       ],
       notes: [
         'Monthly students receive a private recording of each class to review at home.',
-        'Payment in advance via TWINT or bank transfer.',
-        'Cancellation: 24h notice required — otherwise the class is charged.',
+        'Payment via TWINT or bank transfer.',
+        'Reschedules and cancellations must be made at least 24h in advance.',
       ],
     },
     contact: {

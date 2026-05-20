@@ -1,5 +1,4 @@
 import { Component, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslationService } from '../../services/translation.service';
@@ -12,9 +11,8 @@ import { TranslationService } from '../../services/translation.service';
   styleUrl: './hero.component.scss',
 })
 export class HeroComponent implements OnDestroy {
-  @ViewChild('heroIframe') iframeRef!: ElementRef<HTMLIFrameElement>;
+  @ViewChild('heroVideo') videoRef!: ElementRef<HTMLVideoElement>;
 
-  private readonly sanitizer = inject(DomSanitizer);
   protected readonly t = inject(TranslationService).t;
   protected readonly muted = signal(true);
   protected readonly showHint = signal(true);
@@ -23,24 +21,17 @@ export class HeroComponent implements OnDestroy {
   private readonly hintFadeTimer = setTimeout(() => this.hintFading.set(true), 5000);
   private readonly hintTimer = setTimeout(() => this.showHint.set(false), 7000);
 
-  protected readonly videoUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-    'https://www.youtube.com/embed/izzAVi_uaIs?autoplay=1&mute=1&loop=1&playlist=izzAVi_uaIs&controls=0&rel=0&modestbranding=1&enablejsapi=1'
-  );
-
   ngOnDestroy(): void {
     clearTimeout(this.hintFadeTimer);
     clearTimeout(this.hintTimer);
   }
 
   toggleMute(): void {
-    const iframe = this.iframeRef?.nativeElement;
-    if (!iframe) return;
+    const video = this.videoRef?.nativeElement;
+    if (!video) return;
     const newMuted = !this.muted();
     this.muted.set(newMuted);
-    iframe.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newMuted ? 'mute' : 'unMute', args: [] }),
-      '*'
-    );
+    video.muted = newMuted;
   }
 
   scrollToAbout(): void {

@@ -53,7 +53,7 @@ const TRANSLATIONS = {
       intro: 'Schreib mir einfach eine Nachricht – ich freue mich auf dich.',
       emailLabel: 'E-Mail',
       phoneLabel: 'Telefon / WhatsApp',
-      phone: '+41 78 44 95 591',
+      phone: '+41 78 449 55 91',
     },
   },
   en: {
@@ -106,7 +106,7 @@ const TRANSLATIONS = {
       intro: 'Just reach out — I look forward to hearing from you.',
       emailLabel: 'Email',
       phoneLabel: 'Phone / WhatsApp',
-      phone: '+41 78 44 95 591',
+      phone: '+41 78 449 55 91',
     },
   },
 } as const;

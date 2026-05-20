@@ -17,7 +17,7 @@ const TRANSLATIONS = {
     },
     about: {
       heading: 'Über mich',
-      body: 'Ich bin Javier Carranza, Flamenco-Gitarrist seit mehr als zehn Jahren. Aufgewachsen in Zaragoza, habe ich die Flamenco-Gitarre als Kind zum ersten Mal gehört und war sofort fasziniert. Mein erster Lehrer war Rubén Jiménez, im lebhaften Viertel La Magdalena. Später zog ich nach Andalusien, erst nach Granada, dann nach Sevilla, wo ich bei Meistern wie Pedro Sierra, Naranjito Hijo und Miguel Salado gelernt habe.\nJetzt bin ich hier in Bern und möchte dich auf diesem Weg begleiten. Gemeinsam werden wir die Gitarre von Grund auf kennenlernen und jeden Ton spüren. Für mich ist die Gitarre mehr als ein Instrument. Sie ist eine Begleiterin in guten Zeiten und eine Zuflucht in schwierigen. Wenn ich sie in den Händen halte, existiert der Rest der Welt für mich nicht mehr.',
+      body: 'Ich heisse Javier Carranza und spiele seit über zehn Jahren Flamenco-Gitarre. Aufgewachsen bin ich in Zaragoza, wo ich schon als Kind zum ersten Mal Flamenco hörte und sofort davon begeistert war. Meinen ersten Unterricht bekam ich bei Rubén Jiménez im Viertel La Magdalena.\n\nSpäter zog es mich nach Andalusien, zuerst nach Granada und danach nach Sevilla. Dort hatte ich die Möglichkeit, bei renommierten Gitarristen wie Pedro Sierra, Naranjito Hijo und Miguel Salado zu lernen und meinen eigenen Stil weiterzuentwickeln.\n\nHeute lebe ich in Bern und möchte meine Erfahrung und meine Leidenschaft für die Gitarre weitergeben. Im Unterricht arbeiten wir Schritt für Schritt an Technik, Rhythmus und vor allem am musikalischen Gefühl.\n\nDie Gitarre begleitet mich seit vielen Jahren. In guten Zeiten bringt sie Freude, und in schwierigen Momenten hilft sie mir, Ruhe und Ausgleich zu finden.',
     },
     classes: {
       heading: 'Unterricht',
@@ -67,7 +67,7 @@ const TRANSLATIONS = {
     },
     about: {
       heading: 'About me',
-      body: "I'm Javier Carranza, a flamenco guitarist for over ten years. Growing up in Zaragoza, I heard flamenco guitar for the first time as a child and was immediately hooked. My first teacher was Rubén Jiménez, in the vibrant neighbourhood of La Magdalena. Later I moved to Andalusia, first to Granada, then to Seville, where I learned from teachers like Pedro Sierra, Naranjito Hijo and Miguel Salado.\nNow I'm here in Bern and I'd love to accompany you on this journey. Together we'll explore the guitar from the ground up and feel every note. For me the guitar is more than an instrument. It's a companion in good times and a refuge in difficult ones. When I have it in my hands, the rest of the world simply disappears.",
+      body: "My name is Javier Carranza, and I have been playing flamenco guitar for more than ten years. I grew up in Zaragoza, where I first heard flamenco as a child and was immediately fascinated by it. My first guitar teacher was Rubén Jiménez, in the La Magdalena neighbourhood.\n\nLater, I moved to Andalusia, first to Granada and then to Seville. There, I had the opportunity to study with renowned guitarists such as Pedro Sierra, Naranjito Hijo, and Miguel Salado, while gradually developing my own style.\n\nToday I live in Bern, where I share my experience and passion for the guitar. In my lessons, we work step by step on technique, rhythm, and above all, musical expression and sensitivity.\n\nThe guitar has been with me for many years. In the best moments, it has brought me joy, and in the difficult ones, it has helped me find balance and calm.",
     },
     classes: {
       heading: 'Classes',

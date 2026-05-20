@@ -108,8 +108,12 @@
 
   .hint-mobile { display: none; }
 
+  &.fading {
+    animation: hint-fadeout 2s ease-out forwards;
+  }
+
   @media (max-width: 767px) {
-    bottom: 68px;
+    bottom: 58px;
     right: 30px;
     color: #c0634a;
 
@@ -126,6 +130,10 @@
 @keyframes hint-blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.1; }
+}
+
+@keyframes hint-fadeout {
+  to { opacity: 0; }
 }
 
 .scroll-hint {

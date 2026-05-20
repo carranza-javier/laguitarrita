@@ -25,7 +25,7 @@
   </button>
 
   @if (showHint() && muted()) {
-    <div class="mute-hint" (click)="toggleMute()">
+    <div class="mute-hint" [class.fading]="hintFading()" (click)="toggleMute()">
       <mat-icon class="hint-desktop">south_east</mat-icon>
       <mat-icon class="hint-mobile">arrow_downward</mat-icon>
     </div>

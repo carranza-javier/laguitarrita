@@ -18,14 +18,17 @@ export class HeroComponent implements OnDestroy {
   protected readonly t = inject(TranslationService).t;
   protected readonly muted = signal(true);
   protected readonly showHint = signal(true);
+  protected readonly hintFading = signal(false);
 
-  private readonly hintTimer = setTimeout(() => this.showHint.set(false), 6000);
+  private readonly hintFadeTimer = setTimeout(() => this.hintFading.set(true), 5000);
+  private readonly hintTimer = setTimeout(() => this.showHint.set(false), 7000);
 
   protected readonly videoUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
     'https://www.youtube.com/embed/izzAVi_uaIs?autoplay=1&mute=1&loop=1&playlist=izzAVi_uaIs&controls=0&rel=0&modestbranding=1&enablejsapi=1'
   );
 
   ngOnDestroy(): void {
+    clearTimeout(this.hintFadeTimer);
     clearTimeout(this.hintTimer);
   }
 

@@ -14,6 +14,8 @@ const TRANSLATIONS = {
       name: 'Javier Carranza',
       tagline: 'Flamenco-Gitarrenlehrer in Bern',
       sub: 'Für alle Niveaus und Altersgruppen',
+      soundOn: 'Ton an',
+      soundOff: 'Ton aus',
     },
     about: {
       heading: 'Über mich',
@@ -64,6 +66,8 @@ const TRANSLATIONS = {
       name: 'Javier Carranza',
       tagline: 'Flamenco Guitar Teacher in Bern',
       sub: 'For all levels and ages',
+      soundOn: 'Sound on',
+      soundOff: 'Sound off',
     },
     about: {
       heading: 'About me',

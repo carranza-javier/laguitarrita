@@ -48,6 +48,43 @@ const TRANSLATIONS = {
         'Verschiebungen und Absagen müssen bis 24h im Voraus erfolgen.',
       ],
     },
+    faq: {
+      heading: 'Häufige Fragen',
+      items: [
+        {
+          q: 'Kommst du zu mir nach Hause?',
+          a: 'Ja. Ich unterrichte bei dir zu Hause in Bern, damit du in deiner gewohnten Umgebung lernen kannst.',
+        },
+        {
+          q: 'Ist der Unterricht auch für absolute Anfänger geeignet?',
+          a: 'Ja, absolut. Du brauchst keine Vorkenntnisse – wir fangen genau dort an, wo du stehst.',
+        },
+        {
+          q: 'Muss ich Noten lesen können?',
+          a: 'Nein. Im Flamenco lernst du vor allem übers Hören, Fühlen und Spielen. Noten sind keine Voraussetzung.',
+        },
+        {
+          q: 'Brauche ich eine eigene Gitarre?',
+          a: 'Zum Üben brauchst du eine eigene Gitarre. Bei der Auswahl berate ich dich gerne.',
+        },
+        {
+          q: 'Ist die erste Probestunde wirklich kostenlos?',
+          a: 'Ja. Die erste halbe Stunde ist kostenlos und unverbindlich, damit wir uns kennenlernen.',
+        },
+        {
+          q: 'In welchen Sprachen findet der Unterricht statt?',
+          a: 'Auf Deutsch, Englisch oder Spanisch – ganz wie es für dich am besten passt.',
+        },
+        {
+          q: 'Kann ich auch online lernen?',
+          a: 'Ja, Online-Unterricht funktioniert sehr gut. Du brauchst nur eine Gitarre und eine stabile Internetverbindung.',
+        },
+        {
+          q: 'Unterrichtest du nur Flamenco?',
+          a: 'Mein Schwerpunkt ist Flamenco- und spanische Gitarre, aber ich unterrichte auch Pop, Singer-Songwriter und andere Stile. Frag einfach nach.',
+        },
+      ],
+    },
     contact: {
       heading: 'Kontakt',
       intro: 'Schreib mir einfach eine Nachricht – ich freue mich auf dich.',
@@ -99,6 +136,43 @@ const TRANSLATIONS = {
         'Monthly students receive a private recording of each class to review at home.',
         'Payment via TWINT or bank transfer.',
         'Reschedules and cancellations must be made at least 24h in advance.',
+      ],
+    },
+    faq: {
+      heading: 'Frequently Asked Questions',
+      items: [
+        {
+          q: 'Do you come to my home?',
+          a: 'Yes. I teach at your home in Bern so you can learn in a familiar, comfortable environment.',
+        },
+        {
+          q: 'Is the course suitable for complete beginners?',
+          a: 'Absolutely. No prior experience needed — we start exactly where you are.',
+        },
+        {
+          q: 'Do I need to read sheet music?',
+          a: 'No. In flamenco you learn mainly by ear, feel, and playing. Sheet music is not a requirement.',
+        },
+        {
+          q: 'Do I need my own guitar?',
+          a: 'You will need your own guitar for practice. I am happy to advise you on choosing one.',
+        },
+        {
+          q: 'Is the first trial lesson really free?',
+          a: 'Yes. The first 30 minutes are free and no-commitment, so we can get to know each other.',
+        },
+        {
+          q: 'Which languages are lessons taught in?',
+          a: 'German, English, or Spanish — whichever works best for you.',
+        },
+        {
+          q: 'Can I also learn online?',
+          a: 'Yes, online lessons work very well. You just need a guitar and a stable internet connection.',
+        },
+        {
+          q: 'Do you only teach flamenco?',
+          a: 'My focus is flamenco and Spanish guitar, but I also teach pop, singer-songwriter, and other styles. Just ask.',
+        },
       ],
     },
     contact: {

@@ -1,0 +1,17 @@
+<div class="container">
+  <h2 class="section-heading">{{ t().faq.heading }}</h2>
+
+  <dl class="faq-list">
+    @for (item of t().faq.items; track item.q; let i = $index) {
+      <div class="faq-item" [class.open]="openIndex() === i">
+        <dt class="faq-question" (click)="toggle(i)" [attr.aria-expanded]="openIndex() === i">
+          <span>{{ item.q }}</span>
+          <mat-icon class="faq-icon">{{ openIndex() === i ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </dt>
+        @if (openIndex() === i) {
+          <dd class="faq-answer">{{ item.a }}</dd>
+        }
+      </div>
+    }
+  </dl>
+</div>

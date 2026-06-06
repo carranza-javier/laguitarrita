@@ -4,6 +4,7 @@ import { HeroComponent } from './components/hero/hero.component';
 import { AboutComponent } from './components/about/about.component';
 import { ClassesComponent } from './components/classes/classes.component';
 import { PricesComponent } from './components/prices/prices.component';
+import { FaqComponent } from './components/faq/faq.component';
 import { ContactComponent } from './components/contact/contact.component';
 
 @Component({
@@ -15,6 +16,7 @@ import { ContactComponent } from './components/contact/contact.component';
     AboutComponent,
     ClassesComponent,
     PricesComponent,
+    FaqComponent,
     ContactComponent,
   ],
   templateUrl: './app.html',

@@ -3,7 +3,7 @@
   <div class="classes-grid">
     @for (item of t().classes.items; track item.title) {
       <div class="class-item">
-        <mat-icon class="class-icon">{{ item.icon }}</mat-icon>
+        <mat-icon class="class-icon" aria-hidden="true">{{ item.icon }}</mat-icon>
         <h3 class="class-title">{{ item.title }}</h3>
         <p class="class-desc">{{ item.desc }}</p>
       </div>
@@ -11,7 +11,7 @@
   </div>
   <ul class="classes-notes">
     <li>
-      <mat-icon class="note-icon">info_outline</mat-icon>
+      <mat-icon class="note-icon" aria-hidden="true">info_outline</mat-icon>
       <span>{{ t().classes.note }}</span>
     </li>
   </ul>

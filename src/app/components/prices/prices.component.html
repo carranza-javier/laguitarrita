@@ -21,7 +21,7 @@
   <ul class="prices-notes">
     @for (note of t().prices.notes; track note) {
       <li>
-        <mat-icon class="note-icon">info_outline</mat-icon>
+        <mat-icon class="note-icon" aria-hidden="true">info_outline</mat-icon>
         <span>{{ note }}</span>
       </li>
     }

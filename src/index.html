@@ -33,6 +33,122 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://laguitarrita.ch/#business",
+      "name": "La Guitarrita – Javier Carranza",
+      "description": "Flamenco-Gitarrenlehrer in Bern. Unterricht für alle Niveaus und Altersgruppen, bei dir zu Hause oder online. Erste Probestunde gratis.",
+      "url": "https://laguitarrita.ch/",
+      "telephone": "+41784495591",
+      "email": "javier@laguitarrita.ch",
+      "priceRange": "CHF 60–80",
+      "areaServed": {
+        "@type": "City",
+        "name": "Bern"
+      },
+      "image": "https://laguitarrita.ch/assets/javier.jpg"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": "https://laguitarrita.ch/#javier",
+      "name": "Javier Carranza",
+      "jobTitle": "Flamenco-Gitarrenlehrer",
+      "url": "https://laguitarrita.ch/",
+      "image": "https://laguitarrita.ch/assets/javier.jpg",
+      "worksFor": { "@id": "https://laguitarrita.ch/#business" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Flamenco-Gitarrenunterricht",
+      "provider": { "@id": "https://laguitarrita.ch/#business" },
+      "areaServed": {
+        "@type": "City",
+        "name": "Bern"
+      },
+      "availableChannel": [
+        { "@type": "ServiceChannel", "name": "Präsenzunterricht bei dir zu Hause in Bern" },
+        { "@type": "ServiceChannel", "name": "Online-Unterricht" }
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kommst du zu mir nach Hause?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Ich unterrichte bei dir zu Hause in Bern, damit du in deiner gewohnten Umgebung lernen kannst."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist der Unterricht auch für absolute Anfänger geeignet?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, absolut. Du brauchst keine Vorkenntnisse – wir fangen genau dort an, wo du stehst."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Muss ich Noten lesen können?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nein. Im Flamenco lernst du vor allem übers Hören, Fühlen und Spielen. Noten sind keine Voraussetzung."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Brauche ich eine eigene Gitarre?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zum Üben brauchst du eine eigene Gitarre. Bei der Auswahl berate ich dich gerne."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist die erste Probestunde wirklich kostenlos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Die erste halbe Stunde ist kostenlos und unverbindlich, damit wir uns kennenlernen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "In welchen Sprachen findet der Unterricht statt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Auf Deutsch, Englisch oder Spanisch – ganz wie es für dich am besten passt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich auch online lernen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, Online-Unterricht funktioniert sehr gut. Du brauchst nur eine Gitarre und eine stabile Internetverbindung."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Unterrichtest du nur Flamenco?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Mein Schwerpunkt ist Flamenco- und spanische Gitarre, aber ich unterrichte auch Pop, Singer-Songwriter und andere Stile. Frag einfach nach."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
 </head>
 <body>
   <app-root></app-root>

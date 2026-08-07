@@ -56,9 +56,9 @@ Clean, simple and easy to understand at a glance:
 
 | | Price |
 |---|---|
-| Single class | CHF 80 |
-| Monthly presencial — 4 classes | CHF 280 (CHF 70/class) |
-| Monthly online — 4 classes | CHF 240 (CHF 60/class) |
+| Single class | CHF 60 |
+| Monthly presencial — 4 classes | CHF 220 (CHF 55/class) |
+| Monthly online — 4 classes | CHF 200 (CHF 50/class) |
 
 - Monthly students receive a private recording of each class to review at home
 - Payment in advance (TWINT or bank transfer)

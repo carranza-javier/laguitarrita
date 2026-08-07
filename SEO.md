@@ -67,7 +67,7 @@ Add JSON-LD in the (prerendered) HTML:
 - **LocalBusiness** : `name` (La Guitarrita – Javier
   Carranza), `description`, `areaServed` = Bern (use `areaServed`, not a fixed `address`, since
   there is no public studio), `url`, `email` (javier@laguitarrita.ch), `telephone`
-  (+41 78 44 95 591), `priceRange` (`CHF 60–80`), `image`, and `sameAs` once social profiles
+  (+41 78 44 95 591), `priceRange` (`CHF 50–60`), `image`, and `sameAs` once social profiles
   exist.
 - **Person**: Javier Carranza, flamenco guitarist / guitar teacher, `worksFor` the business.
 - **Service**: guitar lessons, `areaServed` Bern, `availableChannel` in-person + online.

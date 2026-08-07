@@ -45,3 +45,6 @@ Thumbs.db
 
 # Claude Code local config
 .claude/
+
+# Asset source archives
+public/*.zip

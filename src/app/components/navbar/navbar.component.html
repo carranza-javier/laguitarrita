@@ -5,6 +5,7 @@
   <nav class="nav-links">
     <button mat-button (click)="scrollTo('about')">{{ ts.t().nav.about }}</button>
     <button mat-button (click)="scrollTo('classes')">{{ ts.t().nav.classes }}</button>
+    <button mat-button (click)="scrollTo('concerts')">{{ ts.t().nav.concerts }}</button>
     <button mat-button (click)="scrollTo('prices')">{{ ts.t().nav.prices }}</button>
     <button mat-button (click)="scrollTo('contact')">{{ ts.t().nav.contact }}</button>
   </nav>
@@ -25,6 +26,7 @@
 <mat-menu #mobileMenu="matMenu" class="mobile-menu">
   <button mat-menu-item (click)="scrollTo('about')">{{ ts.t().nav.about }}</button>
   <button mat-menu-item (click)="scrollTo('classes')">{{ ts.t().nav.classes }}</button>
+  <button mat-menu-item (click)="scrollTo('concerts')">{{ ts.t().nav.concerts }}</button>
   <button mat-menu-item (click)="scrollTo('prices')">{{ ts.t().nav.prices }}</button>
   <button mat-menu-item (click)="scrollTo('contact')">{{ ts.t().nav.contact }}</button>
   <button mat-menu-item (click)="ts.toggle()">

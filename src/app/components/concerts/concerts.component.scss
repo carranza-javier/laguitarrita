@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+.concerts-body {
+  max-width: 620px;
+  margin: 0 0 2rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.concerts-cta {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  transition: background 0.2s;
+
+  &:hover,
+  &:focus-visible {
+    background: #a8533d;
+    text-decoration: none;
+  }
+}

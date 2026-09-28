@@ -7,6 +7,7 @@ const TRANSLATIONS = {
     nav: {
       about: 'Über mich',
       classes: 'Unterricht',
+      concerts: 'Konzerte',
       prices: 'Preise',
       contact: 'Kontakt',
     },
@@ -32,6 +33,11 @@ const TRANSLATIONS = {
         { icon: 'star', title: 'Erste Probestunde gratis', desc: '30 Minuten, kostenlos, ohne jede Verpflichtung.' },
       ],
       note: 'Gitarrenunterricht auch in anderen Stilen: Pop, Rock, Singer-Songwriter und mehr. Frag einfach nach.',
+    },
+    concerts: {
+      heading: 'Konzerte & Auftritte',
+      body: 'Ich spiele auch bei kleinen privaten Veranstaltungen und Konzerten. Gerne erstelle ich dir ein individuelles Angebot, passend zu deinem Anlass.',
+      cta: 'Jetzt anfragen',
     },
     prices: {
       heading: 'Preise',
@@ -100,6 +106,7 @@ const TRANSLATIONS = {
     nav: {
       about: 'About',
       classes: 'Classes',
+      concerts: 'Concerts',
       prices: 'Prices',
       contact: 'Contact',
     },
@@ -125,6 +132,11 @@ const TRANSLATIONS = {
         { icon: 'star', title: 'First trial class free', desc: '30 minutes, no cost, no commitment.' },
       ],
       note: 'Guitar lessons in other styles also available: Pop, Rock, Singer-Songwriter and more. Just ask.',
+    },
+    concerts: {
+      heading: 'Concerts & Performances',
+      body: "I'm also available for small private events and concerts. I'm happy to put together a personal offer tailored to your occasion.",
+      cta: 'Get in touch',
     },
     prices: {
       heading: 'Prices',

@@ -3,6 +3,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { HeroComponent } from './components/hero/hero.component';
 import { AboutComponent } from './components/about/about.component';
 import { ClassesComponent } from './components/classes/classes.component';
+import { ConcertsComponent } from './components/concerts/concerts.component';
 import { PricesComponent } from './components/prices/prices.component';
 import { FaqComponent } from './components/faq/faq.component';
 import { ContactComponent } from './components/contact/contact.component';
@@ -15,6 +16,7 @@ import { ContactComponent } from './components/contact/contact.component';
     HeroComponent,
     AboutComponent,
     ClassesComponent,
+    ConcertsComponent,
     PricesComponent,
     FaqComponent,
     ContactComponent,

@@ -60,6 +60,9 @@ Clean, simple and easy to understand at a glance:
 | Monthly presencial — 4 classes | CHF 220 (CHF 55/class) |
 | Monthly online — 4 classes | CHF 200 (CHF 50/class) |
 
+Launch pricing: the regular prices (CHF 80 / 280 / 240) are shown struck through.
+They live in `LAUNCH_OLD_PRICES` in `prices.component.ts` — set it to `null` to end the launch period.
+
 - Monthly students receive a private recording of each class to review at home
 - Payment in advance (TWINT or bank transfer)
 - Cancellation: 24h notice required, otherwise class is charged

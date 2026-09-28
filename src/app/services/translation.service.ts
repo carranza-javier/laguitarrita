@@ -37,10 +37,13 @@ const TRANSLATIONS = {
       heading: 'Preise',
       col1: 'Angebot',
       col2: 'Preis',
+      launch: 'Startpreis',
+      before: 'Früher',
+      now: 'Jetzt',
       rows: [
-        { label: 'Einzelstunde', price: 'CHF 60 / Std.' },
-        { label: 'Monat Präsenz – 4 Stunden', price: 'CHF 220 (CHF 55/Std.)' },
-        { label: 'Monat Online – 4 Stunden', price: 'CHF 200 (CHF 50/Std.)' },
+        { id: 'single', label: 'Einzelstunde', price: 'CHF 60', detail: '/ Std.' },
+        { id: 'inPerson', label: 'Monat Präsenz – 4 Stunden', price: 'CHF 220', detail: '(CHF 55/Std.)' },
+        { id: 'online', label: 'Monat Online – 4 Stunden', price: 'CHF 200', detail: '(CHF 50/Std.)' },
       ],
       notes: [
         'Monatliche Schüler:innen erhalten nach jeder Stunde eine private Aufnahme zum Nachüben zu Hause.',
@@ -127,10 +130,13 @@ const TRANSLATIONS = {
       heading: 'Prices',
       col1: 'Option',
       col2: 'Price',
+      launch: 'Launch price',
+      before: 'Before',
+      now: 'Now',
       rows: [
-        { label: 'Single class', price: 'CHF 60 / h' },
-        { label: 'Monthly in-person — 4 classes', price: 'CHF 220 (CHF 55/class)' },
-        { label: 'Monthly online — 4 classes', price: 'CHF 200 (CHF 50/class)' },
+        { id: 'single', label: 'Single class', price: 'CHF 60', detail: '/ h' },
+        { id: 'inPerson', label: 'Monthly in-person — 4 classes', price: 'CHF 220', detail: '(CHF 55/class)' },
+        { id: 'online', label: 'Monthly online — 4 classes', price: 'CHF 200', detail: '(CHF 50/class)' },
       ],
       notes: [
         'Monthly students receive a private recording of each class to review at home.',

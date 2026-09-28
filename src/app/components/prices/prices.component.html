@@ -5,14 +5,25 @@
     <thead>
       <tr>
         <th>{{ t().prices.col1 }}</th>
-        <th>{{ t().prices.col2 }}</th>
+        <th>
+          {{ t().prices.col2 }}
+          @if (oldPrices) {
+            <span class="launch-label">{{ t().prices.launch }}</span>
+          }
+        </th>
       </tr>
     </thead>
     <tbody>
-      @for (row of t().prices.rows; track row.label) {
+      @for (row of t().prices.rows; track row.id) {
+        @let old = oldPrices?.[row.id];
         <tr>
           <td>{{ row.label }}</td>
-          <td class="price-cell">{{ row.price }}</td>
+          <td class="price-cell">
+            @if (old) {
+              <span class="price-old"><span class="visually-hidden">{{ t().prices.before }} </span><del>{{ old }}</del></span>
+            }
+            <span class="price-new">@if (old) {<span class="visually-hidden">{{ t().prices.now }} </span>}<strong>{{ row.price }}</strong> {{ row.detail }}</span>
+          </td>
         </tr>
       }
     </tbody>

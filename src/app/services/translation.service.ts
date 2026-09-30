@@ -51,6 +51,7 @@ const TRANSLATIONS = {
         { id: 'inPerson', label: 'Monat Präsenz – 4 Stunden', price: 'CHF 220', detail: '(CHF 55/Std.)' },
         { id: 'online', label: 'Monat Online – 4 Stunden', price: 'CHF 200', detail: '(CHF 50/Std.)' },
       ],
+      finePrint: 'Der Preis gilt für Unterricht in Bern. Bei Anfahrt ausserhalb von Bern werden die Fahrtkosten (Zugticket) zusätzlich verrechnet.',
       notes: [
         'Monatliche Schüler:innen erhalten nach jeder Stunde eine private Aufnahme zum Nachüben zu Hause.',
         'Zahlung per TWINT oder Banküberweisung.',
@@ -150,6 +151,7 @@ const TRANSLATIONS = {
         { id: 'inPerson', label: 'Monthly in-person — 4 classes', price: 'CHF 220', detail: '(CHF 55/class)' },
         { id: 'online', label: 'Monthly online — 4 classes', price: 'CHF 200', detail: '(CHF 50/class)' },
       ],
+      finePrint: 'The price applies to lessons in Bern. For locations outside Bern, travel costs (train ticket) are charged additionally.',
       notes: [
         'Monthly students receive a private recording of each class to review at home.',
         'Payment via TWINT or bank transfer.',

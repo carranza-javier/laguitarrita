@@ -13,7 +13,7 @@ const TRANSLATIONS = {
     },
     hero: {
       name: 'Javier Carranza',
-      tagline: 'Flamenco-Gitarrenlehrer in Bern',
+      tagline: 'Flamenco-Gitarrenunterricht in Bern',
       sub: 'Für alle Niveaus und Altersgruppen',
       soundOn: 'Ton an',
       soundOff: 'Ton aus',
@@ -23,16 +23,16 @@ const TRANSLATIONS = {
       body: 'Ich heisse Javier Carranza, komme aus Spanien und spiele seit über zehn Jahren Flamenco-Gitarre. Aufgewachsen bin ich in Zaragoza, wo ich schon als Kind zum ersten Mal Flamenco hörte und sofort davon begeistert war. Meinen ersten Unterricht bekam ich bei Rubén Jiménez im Viertel La Magdalena.\n\nSpäter zog es mich nach Andalusien, zuerst nach Granada und danach nach Sevilla. Dort hatte ich die Möglichkeit, bei renommierten Gitarristen wie Pedro Sierra, Naranjito Hijo und Miguel Salado zu lernen und meinen eigenen Stil weiterzuentwickeln.\n\nDie Gitarre begleitet mich seit vielen Jahren. In guten Zeiten bringt sie Freude, und in schwierigen Momenten hilft sie mir, Ruhe und Ausgleich zu finden.\n\nHeute lebe ich in Bern und möchte meine Erfahrung und meine Leidenschaft für die Gitarre weitergeben. Im Unterricht arbeiten wir Schritt für Schritt an Technik, Rhythmus und vor allem am musikalischen Gefühl.',
     },
     classes: {
-      heading: 'Unterricht',
+      heading: 'Gitarrenunterricht',
       items: [
-        { icon: 'music_note', title: 'Flamenco-Gitarre', desc: 'Massgeschneiderter Unterricht für deine Ziele.' },
+        { icon: 'music_note', title: 'Flamenco und spanische Gitarre', desc: 'Mein Schwerpunkt – massgeschneiderter Unterricht für deine Ziele.' },
         { icon: 'people', title: 'Alle Niveaus und Altersgruppen', desc: 'Auch Anfänger sind herzlich willkommen. Kinder, Jugendliche, Erwachsene.' },
         { icon: 'fitness_center', title: 'Praxisorientiert', desc: 'Stücke, Übungen und schnelle Fortschritte.' },
         { icon: 'home', title: 'Präsenz oder Online', desc: 'Wenn du in Bern wohnst, komme ich gerne zu dir nach Hause. Oder online – wie es dir am besten passt.' },
         { icon: 'language', title: 'Auf Deutsch, Englisch oder Spanisch', desc: 'Du wählst die Sprache, in der du dich am wohlsten fühlst.' },
         { icon: 'star', title: 'Erste Probestunde gratis', desc: '30 Minuten, kostenlos, ohne jede Verpflichtung.' },
       ],
-      note: 'Gitarrenunterricht auch in anderen Stilen: Pop, Rock, Singer-Songwriter und mehr. Frag einfach nach.',
+      note: 'Gitarrenunterricht auch in anderen Stilen: Pop, Rock, Singer-Songwriter und mehr. Ideal auch für den Einstieg in die Gitarre. Frag einfach nach.',
     },
     concerts: {
       heading: 'Konzerte & Auftritte',
@@ -91,7 +91,7 @@ const TRANSLATIONS = {
         },
         {
           q: 'Unterrichtest du nur Flamenco?',
-          a: 'Mein Schwerpunkt ist Flamenco- und spanische Gitarre, aber ich unterrichte auch Pop, Singer-Songwriter und andere Stile. Frag einfach nach.',
+          a: 'Mein Schwerpunkt ist Flamenco und spanische Gitarre, aber ich unterrichte auch Pop, Singer-Songwriter und andere Stile. Frag einfach nach.',
         },
       ],
     },
@@ -113,7 +113,7 @@ const TRANSLATIONS = {
     },
     hero: {
       name: 'Javier Carranza',
-      tagline: 'Flamenco Guitar Teacher in Bern',
+      tagline: 'Flamenco Guitar Lessons in Bern',
       sub: 'For all levels and ages',
       soundOn: 'Sound on',
       soundOff: 'Sound off',
@@ -123,16 +123,16 @@ const TRANSLATIONS = {
       body: "My name is Javier Carranza, I am from Spain, and I have been playing flamenco guitar for more than ten years. I grew up in Zaragoza, where I first heard flamenco as a child and was immediately fascinated by it. My first guitar teacher was Rubén Jiménez, in the La Magdalena neighbourhood.\n\nLater, I moved to Andalusia, first to Granada and then to Seville. There, I had the opportunity to study with renowned guitarists such as Pedro Sierra, Naranjito Hijo, and Miguel Salado, while gradually developing my own style.\n\nThe guitar has been with me for many years. In the best moments, it has brought me joy, and in the difficult ones, it has helped me find balance and calm.\n\nToday I live in Bern, where I share my experience and passion for the guitar. In my lessons, we work step by step on technique, rhythm, and above all, musical expression and sensitivity.",
     },
     classes: {
-      heading: 'Classes',
+      heading: 'Guitar lessons',
       items: [
-        { icon: 'music_note', title: 'Flamenco Guitar', desc: 'Tailor-made lessons for your goals.' },
+        { icon: 'music_note', title: 'Flamenco and Spanish Guitar', desc: 'My speciality – tailor-made lessons for your goals.' },
         { icon: 'people', title: 'All levels and ages', desc: 'Beginners are also very welcome. Children, teens, adults.' },
         { icon: 'fitness_center', title: 'Practical approach', desc: 'Pieces, exercises and quick progress.' },
         { icon: 'home', title: 'In-person or online', desc: 'If you live in Bern, I am happy to come to your home. Or online — whatever works best for you.' },
         { icon: 'language', title: 'In German, English or Spanish', desc: 'Choose whichever language you feel most comfortable in.' },
         { icon: 'star', title: 'First trial class free', desc: '30 minutes, no cost, no commitment.' },
       ],
-      note: 'Guitar lessons in other styles also available: Pop, Rock, Singer-Songwriter and more. Just ask.',
+      note: 'Guitar lessons in other styles also available: Pop, Rock, Singer-Songwriter and more. A great way to get started with the guitar, too. Just ask.',
     },
     concerts: {
       heading: 'Concerts & Performances',

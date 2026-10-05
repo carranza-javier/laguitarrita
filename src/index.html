@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <title>Flamenco-Gitarrenlehrer in Bern – Javier Carranza</title>
+  <title>Gitarrenunterricht in Bern – Flamenco &amp; spanische Gitarre</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Flamenco-Gitarrenlehrer in Bern. Für alle Niveaus und Altersgruppen. Erste Probestunde gratis.">
+  <meta name="description" content="Gitarrenunterricht in Bern bei dir zu Hause oder online: Flamenco, spanische Gitarre und mehr. Für alle Niveaus und Altersgruppen. Erste Probestunde gratis.">
   <link rel="canonical" href="https://laguitarrita.ch/">
 
   <!-- Favicons -->
@@ -18,15 +18,16 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://laguitarrita.ch/">
-  <meta property="og:title" content="Flamenco-Gitarrenlehrer in Bern – Javier Carranza">
-  <meta property="og:description" content="Flamenco-Gitarrenlehrer in Bern. Für alle Niveaus und Altersgruppen. Erste Probestunde gratis.">
+  <meta property="og:title" content="Gitarrenunterricht in Bern – Flamenco &amp; spanische Gitarre">
+  <meta property="og:description" content="Gitarrenunterricht in Bern bei dir zu Hause oder online: Flamenco, spanische Gitarre und mehr. Für alle Niveaus und Altersgruppen. Erste Probestunde gratis.">
   <meta property="og:locale" content="de_CH">
+  <meta property="og:site_name" content="La Guitarrita – Javier Carranza">
   <meta property="og:image" content="https://laguitarrita.ch/assets/javier.jpg">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Flamenco-Gitarrenlehrer in Bern – Javier Carranza">
-  <meta name="twitter:description" content="Flamenco-Gitarrenlehrer in Bern. Für alle Niveaus und Altersgruppen. Erste Probestunde gratis.">
+  <meta name="twitter:title" content="Gitarrenunterricht in Bern – Flamenco &amp; spanische Gitarre">
+  <meta name="twitter:description" content="Gitarrenunterricht in Bern bei dir zu Hause oder online: Flamenco, spanische Gitarre und mehr. Für alle Niveaus und Altersgruppen. Erste Probestunde gratis.">
   <meta name="twitter:image" content="https://laguitarrita.ch/assets/javier.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,11 +43,17 @@
       "@type": "LocalBusiness",
       "@id": "https://laguitarrita.ch/#business",
       "name": "La Guitarrita – Javier Carranza",
-      "description": "Flamenco-Gitarrenlehrer in Bern. Unterricht für alle Niveaus und Altersgruppen, bei dir zu Hause oder online. Erste Probestunde gratis.",
+      "description": "Gitarrenunterricht in Bern mit Schwerpunkt Flamenco und spanische Gitarre, auch Pop, Rock und Singer-Songwriter. Für alle Niveaus und Altersgruppen, bei dir zu Hause oder online. Erste Probestunde gratis.",
       "url": "https://laguitarrita.ch/",
       "telephone": "+41784495591",
       "email": "javier@laguitarrita.ch",
       "priceRange": "CHF 50–60",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Bern",
+        "addressRegion": "BE",
+        "addressCountry": "CH"
+      },
       "areaServed": {
         "@type": "City",
         "name": "Bern"
@@ -58,7 +65,8 @@
       "@type": "Person",
       "@id": "https://laguitarrita.ch/#javier",
       "name": "Javier Carranza",
-      "jobTitle": "Flamenco-Gitarrenlehrer",
+      "jobTitle": "Gitarrenlehrer und Flamenco-Gitarrist",
+      "knowsLanguage": ["de", "en", "es"],
       "url": "https://laguitarrita.ch/",
       "image": "https://laguitarrita.ch/assets/javier.jpg",
       "worksFor": { "@id": "https://laguitarrita.ch/#business" }
@@ -66,7 +74,9 @@
     {
       "@context": "https://schema.org",
       "@type": "Service",
-      "name": "Flamenco-Gitarrenunterricht",
+      "name": "Gitarrenunterricht in Bern",
+      "serviceType": "Gitarrenunterricht",
+      "description": "Gitarrenunterricht für alle Niveaus und Altersgruppen mit Schwerpunkt Flamenco und spanische Gitarre, auch Pop, Rock und Singer-Songwriter. Auf Deutsch, Englisch oder Spanisch.",
       "provider": { "@id": "https://laguitarrita.ch/#business" },
       "areaServed": {
         "@type": "City",
@@ -75,6 +85,12 @@
       "availableChannel": [
         { "@type": "ServiceChannel", "name": "Präsenzunterricht bei dir zu Hause in Bern" },
         { "@type": "ServiceChannel", "name": "Online-Unterricht" }
+      ],
+      "offers": [
+        { "@type": "Offer", "name": "Einzelstunde", "price": "60", "priceCurrency": "CHF" },
+        { "@type": "Offer", "name": "Monat Präsenz – 4 Stunden", "price": "220", "priceCurrency": "CHF" },
+        { "@type": "Offer", "name": "Monat Online – 4 Stunden", "price": "200", "priceCurrency": "CHF" },
+        { "@type": "Offer", "name": "Probestunde (30 Minuten)", "price": "0", "priceCurrency": "CHF" }
       ]
     },
     {
@@ -153,7 +169,7 @@
           "name": "Unterrichtest du nur Flamenco?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Mein Schwerpunkt ist Flamenco- und spanische Gitarre, aber ich unterrichte auch Pop, Singer-Songwriter und andere Stile. Frag einfach nach."
+            "text": "Mein Schwerpunkt ist Flamenco und spanische Gitarre, aber ich unterrichte auch Pop, Singer-Songwriter und andere Stile. Frag einfach nach."
           }
         }
       ]

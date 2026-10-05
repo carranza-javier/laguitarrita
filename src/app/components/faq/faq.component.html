@@ -8,9 +8,7 @@
           <span>{{ item.q }}</span>
           <mat-icon class="faq-icon">{{ openIndex() === i ? 'expand_less' : 'expand_more' }}</mat-icon>
         </dt>
-        @if (openIndex() === i) {
-          <dd class="faq-answer">{{ item.a }}</dd>
-        }
+        <dd class="faq-answer" [hidden]="openIndex() !== i">{{ item.a }}</dd>
       </div>
     }
   </dl>

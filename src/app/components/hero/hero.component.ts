@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild, afterNextRender, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslationService } from '../../services/translation.service';
@@ -10,8 +10,9 @@ import { TranslationService } from '../../services/translation.service';
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.scss',
 })
-export class HeroComponent implements AfterViewInit, OnDestroy {
+export class HeroComponent implements OnDestroy {
   @ViewChild('heroVideo') videoRef!: ElementRef<HTMLVideoElement>;
+  @ViewChild('heroContent') contentRef!: ElementRef<HTMLElement>;
 
   protected readonly t = inject(TranslationService).t;
   protected readonly muted = signal(true);
@@ -22,9 +23,18 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
   private readonly hintFadeTimer = setTimeout(() => this.hintFading.set(true), 5000);
   private readonly hintTimer = setTimeout(() => this.showHint.set(false), 7000);
 
-  ngAfterViewInit(): void {
-    const video = this.videoRef?.nativeElement;
-    if (video) video.muted = true;
+  constructor() {
+    // With hydration the prerendered intro animation may already be running (or even
+    // finished) before Angular boots, so wait on the animation itself rather than on
+    // an animationend event that could have fired before the listener existed.
+    afterNextRender(() => {
+      const video = this.videoRef?.nativeElement;
+      if (video) video.muted = true;
+      const animations = this.contentRef?.nativeElement.getAnimations?.() ?? [];
+      Promise.all(animations.map(a => a.finished))
+        .catch(() => {})
+        .then(() => this.startVideo());
+    });
   }
 
   ngOnDestroy(): void {
@@ -32,10 +42,10 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
     clearTimeout(this.hintTimer);
   }
 
-  onContentAnimationEnd(): void {
+  private startVideo(): void {
     const video = this.videoRef?.nativeElement;
-    if (!video) return;
-    video.play();
+    if (!video || this.showVideo()) return;
+    video.play().catch(() => {});
     this.showVideo.set(true);
   }
 

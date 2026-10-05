@@ -3,14 +3,16 @@
     #heroVideo
     class="hero-video"
     [class.video-ready]="showVideo()"
-    src="https://d1sv0wy23k5ghd.cloudfront.net/javigranaina.mp4"
+    src="https://d1sv0wy23k5ghd.cloudfront.net/javigranaina-720.mp4"
+    preload="auto"
+    muted
     loop
     playsinline>
   </video>
 
   <div class="hero-overlay"></div>
 
-  <div class="hero-content" (animationend)="onContentAnimationEnd()">
+  <div #heroContent class="hero-content">
     <p class="hero-name">{{ t().hero.name }}</p>
     <h1 class="hero-tagline">{{ t().hero.tagline }}</h1>
     <p class="hero-sub">{{ t().hero.sub }}</p>

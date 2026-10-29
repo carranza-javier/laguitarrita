@@ -1,0 +1,29 @@
+{
+  "name": "laguitarrita-students-backend",
+  "private": true,
+  "type": "module",
+  "description": "Admin scripts and integration tests for the laguitarrita.ch student area.",
+  "scripts": {
+    "build": "sam build",
+    "deploy": "sam build && sam deploy",
+    "deploy:test": "sam build && sam deploy --config-env test",
+    "create-student": "node scripts/create-student.mjs",
+    "reset-password": "node scripts/reset-password.mjs",
+    "upload-videos": "node scripts/upload-videos.mjs",
+    "delete-student": "node scripts/delete-student.mjs",
+    "list-students": "node scripts/list-students.mjs",
+    "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.1160.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1160.0",
+    "@aws-sdk/client-s3": "^3.1160.0",
+    "@aws-sdk/lib-storage": "^3.1160.0"
+  },
+  "devDependencies": {
+    "amazon-cognito-identity-js": "^6.3.22"
+  }
+}

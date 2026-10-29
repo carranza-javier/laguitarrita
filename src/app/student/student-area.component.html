@@ -1,0 +1,93 @@
+<header class="bar">
+  <a class="logo" routerLink="/">La Guitarrita</a>
+  <span class="spacer"></span>
+  @if (view() === 'videos') {
+    <button type="button" class="link-btn" (click)="logout()">{{ t().logout }}</button>
+  }
+  <button type="button" class="link-btn lang" (click)="ts.toggle()">
+    {{ ts.lang() === 'de' ? 'EN' : 'DE' }}
+  </button>
+</header>
+
+<main class="page">
+  @switch (view()) {
+    @case ('checking') {
+      <p class="muted center" aria-live="polite">…</p>
+    }
+
+    @case ('login') {
+      <section class="card">
+        <h1>{{ t().heading }}</h1>
+        <p class="muted">{{ t().intro }}</p>
+
+        <form (ngSubmit)="submit()" novalidate>
+          <label for="email">{{ t().email }}</label>
+          <input id="email" name="email" type="email" autocomplete="username" inputmode="email"
+                 autocapitalize="none" spellcheck="false" [(ngModel)]="email" [disabled]="busy()" />
+
+          <label for="password">{{ t().password }}</label>
+          <div class="password">
+            <input id="password" name="password" [type]="showPassword() ? 'text' : 'password'"
+                   autocomplete="current-password" [(ngModel)]="password" [disabled]="busy()" />
+            <button type="button" class="link-btn" (click)="showPassword.set(!showPassword())"
+                    [attr.aria-label]="showPassword() ? t().hidePassword : t().showPassword">
+              <span class="material-icons" aria-hidden="true">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+
+          @if (error(); as e) {
+            <p class="error" role="alert">{{ t().errors[e] }}</p>
+          }
+
+          <button type="submit" class="primary" [disabled]="busy()">
+            {{ busy() ? t().loggingIn : t().login }}
+          </button>
+        </form>
+
+        <p class="hint">{{ t().forgot }} <a href="mailto:javier@laguitarrita.ch">javier&#64;laguitarrita.ch</a></p>
+      </section>
+    }
+
+    @case ('videos') {
+      <section class="videos">
+        <h1>{{ t().videosHeading }}</h1>
+        @if (session()?.name) {
+          <p class="muted">{{ t().hello }} {{ session()?.name }}</p>
+        }
+
+        @if (error(); as e) {
+          <p class="error" role="alert">
+            {{ t().errors[e] }}
+            <button type="button" class="link-btn accent" (click)="loadVideos()">{{ t().retry }}</button>
+          </p>
+        } @else if (videos() === null) {
+          <p class="muted" aria-live="polite">{{ t().loading }}</p>
+        } @else if (!videos()!.length) {
+          <p class="muted">{{ t().empty }}</p>
+        }
+
+        <ul class="list">
+          @for (item of videos() ?? []; track item.name) {
+            <li class="item">
+              <video #player controls playsinline preload="metadata" [attr.data-name]="item.name"
+                     [src]="item.playUrl()" (error)="onPlayerError(item, player)"></video>
+              <div class="info">
+                <div>
+                  <h2>{{ item.title }}</h2>
+                  <p class="muted small">{{ formatDate(item.date) }} · {{ formatSize(item.size) }}</p>
+                </div>
+                <a class="download" [href]="item.downloadUrl()" (click)="download($event, item)">
+                  <span class="material-icons" aria-hidden="true">download</span>{{ t().download }}
+                </a>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</main>
+
+<footer class="foot">
+  <a routerLink="/">{{ t().home }}</a>
+</footer>

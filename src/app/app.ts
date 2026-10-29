@@ -1,27 +1,23 @@
-import { Component } from '@angular/core';
-import { NavbarComponent } from './components/navbar/navbar.component';
-import { HeroComponent } from './components/hero/hero.component';
-import { AboutComponent } from './components/about/about.component';
-import { ClassesComponent } from './components/classes/classes.component';
-import { ConcertsComponent } from './components/concerts/concerts.component';
-import { PricesComponent } from './components/prices/prices.component';
-import { FaqComponent } from './components/faq/faq.component';
-import { ContactComponent } from './components/contact/contact.component';
+import { Component, afterNextRender, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    NavbarComponent,
-    HeroComponent,
-    AboutComponent,
-    ClassesComponent,
-    ConcertsComponent,
-    PricesComponent,
-    FaqComponent,
-    ContactComponent,
-  ],
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
+  imports: [RouterOutlet],
+  template: '<router-outlet />',
 })
-export class App {}
+export class App {
+  constructor() {
+    const router = inject(Router);
+    // public/404.html stores the requested path before sending GitHub Pages visitors to "/".
+    afterNextRender(() => {
+      let redirect: string | null = null;
+      try {
+        redirect = sessionStorage.getItem('redirect');
+        sessionStorage.removeItem('redirect');
+      } catch {}
+      if (redirect && redirect !== '/') router.navigateByUrl(redirect);
+    });
+  }
+}

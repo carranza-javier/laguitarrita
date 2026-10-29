@@ -5,13 +5,13 @@ Personal website for Javier Carranza, Flamenco guitar teacher in Bern, Switzerla
 ## Stack
 - **Frontend**: Angular (static build, deployed on GitHub Pages)
 - **UI Library**: Angular Material
-- **Backend**: AWS Lambda + API Gateway (to be implemented later)
-- **Storage**: AWS S3 (for private student videos, later)
-- **Auth**: JWT (later, for private student area)
+- **Backend** (student area): AWS SAM in `backend/` — API Gateway HTTP API + Lambda
+- **Storage**: private S3 bucket for student videos
+- **Auth**: Cognito user pool (JWT), admin-created users only
 
 ## Deployment
-- Frontend: GitHub Pages
-- Backend: AWS (not in scope for now)
+- Frontend: GitHub Pages (`.github/workflows/deploy.yml`, builds the Angular app only)
+- Backend: deployed manually with AWS SAM (see *Student area* below)
 
 > Note: Use `HashLocationStrategy` for Angular routing to work correctly on GitHub Pages.
 
@@ -73,9 +73,71 @@ They live in `LAUNCH_OLD_PRICES` in `prices.component.ts` — set it to `null` t
 - Show phone/WhatsApp number (to be provided)
 - Keep it simple — just reach out directly
 
+## Student area (`/schueler`)
+Students sign in with e-mail and password and can watch and download only their own class videos.
+There is no public sign-up, no password recovery and no e-mail: the teacher manages everything with
+the scripts below.
+
+- Region `eu-central-1`, stack `laguitarrita-students` (template: `backend/template.yaml`)
+- Videos: `s3://laguitarrita-students-videos-964907375727/students/{cognito-sub}/videos/{file}`.
+  They are permanent (no lifecycle rules, bucket kept even if the stack is deleted).
+- `GET /videos` returns the caller's videos with presigned URLs valid for 1 hour; the page asks for
+  new ones transparently when they expire.
+- Public frontend config (pool id, client id, API URL): `src/app/student/student-config.ts`.
+
+### Admin scripts
+Requirements: Node.js 22+, AWS CLI credentials for the account, and optionally ffmpeg
+(`winget install Gyan.FFmpeg`). Run once: `cd backend && npm install`.
+
+All scripts accept `--stack <name>` (default `laguitarrita-students`). If `--password` is omitted the
+script asks for it without showing it (and it does not end up in the shell history).
+
+```bash
+cd backend
+
+# Create a student (permanent password, no e-mail is sent). Prints the student's sub.
+node scripts/create-student.mjs --email mike@example.com --name "Mike Weber" --password "..."
+
+# Upload videos (files and/or folders). With ffmpeg, videos above 480p are re-encoded to 480p
+# with +faststart; 480p or smaller are uploaded unchanged. Existing files are skipped unless --overwrite.
+node scripts/upload-videos.mjs --email mike@example.com "C:/Videos/Mike/clase-01.mp4" "C:/Videos/Mike/"
+
+# Set a new password (also signs the student out everywhere)
+node scripts/reset-password.mjs --email mike@example.com --password "..."
+
+# List students with their sub and number of videos
+node scripts/list-students.mjs
+
+# Delete a student's login; add --delete-videos to also delete their folder
+node scripts/delete-student.mjs --email mike@example.com [--delete-videos]
+```
+
+Deleting a single video: `aws s3 rm "s3://laguitarrita-students-videos-964907375727/students/<sub>/videos/<file>"`.
+
+### Deploying the backend
+Requires the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html).
+
+```bash
+cd backend
+sam build && sam deploy                      # production stack (samconfig.toml)
+sam build && sam deploy --config-env test    # throwaway test stack laguitarrita-students-test
+```
+
+### Tests
+`npm run test:integration` (in `backend/`, needs ffmpeg) creates two temporary students on the stack
+named by `STUDENTS_STACK` (default `laguitarrita-students-test`), checks that requests without a valid
+token get 401 and that student B can never see or download student A's videos, then deletes them.
+
+To remove the test stack: empty and delete its bucket (it is retained) after
+`aws cloudformation delete-stack --stack-name laguitarrita-students-test`.
+
+### Costs
+All resources carry the tag `project=laguitarrita-students`; the AWS budget
+`laguitarrita-students-5usd` alerts javier@laguitarrita.ch at 80 % (actual) and 100 % (forecast) of
+5 USD/month once the tag is activated as a cost allocation tag:
+`aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=project,Status=Active`
+
 ## Future features (not in scope now)
-- Private student area (login with JWT, hosted on AWS)
-- Private video library per student (AWS S3)
 - AI chatbot (AWS Bedrock)
 
 ## General notes

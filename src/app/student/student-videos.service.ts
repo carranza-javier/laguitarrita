@@ -2,8 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { StudentAuthError, StudentAuthService } from './student-auth.service';
 import { STUDENT_CONFIG } from './student-config';
 
+export type FileType = 'video' | 'audio' | 'pdf';
+
 export interface VideoDto {
   name: string;
+  /** Videos and audio files play in the player dialog, PDFs open in the browser's viewer. */
+  type: FileType;
   /** Recording date (from the video's metadata) or, if unknown, the upload date. */
   date: string;
   size: number;

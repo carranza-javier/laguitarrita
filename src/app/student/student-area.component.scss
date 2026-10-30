@@ -362,6 +362,12 @@ input {
   }
 }
 
+.player-dialog audio {
+  display: block;
+  width: 100%;
+  margin: 8px 0 4px;
+}
+
 .player-dialog video {
   display: block;
   width: 100%;

@@ -16,13 +16,14 @@ import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TranslationService } from '../services/translation.service';
 import { AuthErrorCode, StudentAuthError, StudentAuthService, StudentSession } from './student-auth.service';
-import { MAX_NOTE_LENGTH, StudentVideosService, VideoDto } from './student-videos.service';
+import { FileType, MAX_NOTE_LENGTH, StudentVideosService, VideoDto } from './student-videos.service';
 
 type View = 'checking' | 'login' | 'videos';
 type ErrorKey = AuthErrorCode | 'missing' | 'videos';
 
 interface VideoItem {
   name: string;
+  type: FileType;
   title: string;
   date: Date;
   size: number;
@@ -82,7 +83,7 @@ export class StudentAreaComponent {
   protected readonly speed = signal(1);
   protected readonly playing = signal<VideoItem | null>(null);
   private readonly playerDialog = viewChild<ElementRef<HTMLDialogElement>>('playerDialog');
-  private readonly player = viewChild<ElementRef<HTMLVideoElement>>('player');
+  private readonly player = viewChild<ElementRef<HTMLMediaElement>>('player');
 
   // Notes dialog.
   protected readonly maxNoteLength = MAX_NOTE_LENGTH;
@@ -167,6 +168,34 @@ export class StudentAreaComponent {
 
   // ---------------------------------------------------------------- player
 
+  /** Main action of a row: play videos and audio files, open PDFs in the browser's viewer. */
+  protected open(event: MouseEvent, item: VideoItem): void {
+    if (item.type === 'pdf') this.openPdf(event, item);
+    else this.play(item);
+  }
+
+  /**
+   * Opens a PDF in a new tab. A still valid link is simply followed; otherwise the tab is opened
+   * right away (so it is not blocked as a pop-up) and pointed at a fresh URL once there is one.
+   */
+  protected async openPdf(event: MouseEvent, item: VideoItem): Promise<void> {
+    const isLink = event.currentTarget instanceof HTMLAnchorElement;
+    if (!this.urlsStale()) {
+      if (!isLink) window.open(item.playUrl(), '_blank', 'noopener');
+      return;
+    }
+    event.preventDefault();
+    const tab = window.open('', '_blank');
+    if (tab) tab.opener = null;
+    try {
+      await this.refreshUrls();
+      if (tab) tab.location.href = item.playUrl();
+      else window.location.assign(item.playUrl());
+    } catch {
+      tab?.close();
+    }
+  }
+
   protected async play(item: VideoItem): Promise<void> {
     if (this.urlsStale()) {
       try {
@@ -204,12 +233,12 @@ export class StudentAreaComponent {
   }
 
   /** A new src resets the playback rate, so the chosen speed is applied again. */
-  protected onPlayerLoaded(player: HTMLVideoElement): void {
+  protected onPlayerLoaded(player: HTMLMediaElement): void {
     player.playbackRate = this.speed();
   }
 
   /** The presigned URL may have expired (e.g. the dialog stayed open): get a new one and resume. */
-  protected async onPlayerError(item: VideoItem, player: HTMLVideoElement): Promise<void> {
+  protected async onPlayerError(item: VideoItem, player: HTMLMediaElement): Promise<void> {
     if (Date.now() - this.lastRefresh < MIN_RETRY_INTERVAL_MS) return;
     const resumeAt = player.currentTime;
     try {
@@ -279,15 +308,22 @@ export class StudentAreaComponent {
   }
 
   protected formatSize(bytes: number): string {
-    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    const mb = bytes / 1024 / 1024;
+    return mb < 1 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${mb.toFixed(1)} MB`;
   }
 
   protected formatSpeed(speed: number): string {
     return `${speed.toLocaleString(this.locale())}×`;
   }
 
-  protected countLabel(count: number): string {
-    return `${count} ${count === 1 ? this.t().videoCountOne : this.t().videoCount}`;
+  /** "3 Videos · 1 Audio · 2 PDFs" */
+  protected countLabel(items: VideoItem[]): string {
+    const words = this.t().count;
+    return (['video', 'audio', 'pdf'] as const)
+      .map((type) => [type, items.filter((i) => i.type === type).length] as const)
+      .filter(([, n]) => n > 0)
+      .map(([type, n]) => `${n} ${words[type][n === 1 ? 0 : 1]}`)
+      .join(' · ');
   }
 
   private locale(): string {
@@ -380,6 +416,7 @@ export class StudentAreaComponent {
 function toItem(v: VideoDto): VideoItem {
   return {
     name: v.name,
+    type: v.type ?? 'video',
     // The title is the file name exactly as uploaded, without the extension.
     title: v.name.replace(/\.[^.]+$/, ''),
     date: new Date(v.date),

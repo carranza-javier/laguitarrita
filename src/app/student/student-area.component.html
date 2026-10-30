@@ -85,14 +85,14 @@
                     [attr.aria-expanded]="isOpen(group)" [disabled]="!!query().trim()">
               <span class="material-icons chevron" [class.open]="isOpen(group)" aria-hidden="true">chevron_right</span>
               <span class="month-label">{{ group.label }}</span>
-              <span class="muted count">{{ countLabel(group.items.length) }}</span>
+              <span class="muted count">{{ countLabel(group.items) }}</span>
             </button>
 
             @if (isOpen(group)) {
               <ul class="rows">
                 @for (item of group.items; track item.name) {
                   <li class="row">
-                    <button type="button" class="row-main" (click)="play(item)">
+                    <button type="button" class="row-main" (click)="open($event, item)">
                       <span class="row-title">{{ item.title }}</span>
                       <span class="muted small">{{ formatDate(item.date) }} · {{ formatSize(item.size) }}</span>
                       @if (item.note()) {
@@ -100,10 +100,18 @@
                       }
                     </button>
                     <div class="actions">
-                      <button type="button" class="icon-btn play" (click)="play(item)"
-                              [attr.aria-label]="t().play + ': ' + item.title" [title]="t().play">
-                        <span class="material-icons" aria-hidden="true">play_arrow</span>
-                      </button>
+                      @if (item.type === 'pdf') {
+                        <a class="icon-btn play" [href]="item.playUrl()" target="_blank" rel="noopener"
+                           (click)="openPdf($event, item)" [attr.aria-label]="t().open + ': ' + item.title" [title]="t().open">
+                          <span class="material-icons" aria-hidden="true">picture_as_pdf</span>
+                        </a>
+                      } @else {
+                        @let action = item.type === 'audio' ? t().listen : t().play;
+                        <button type="button" class="icon-btn play" (click)="play(item)"
+                                [attr.aria-label]="action + ': ' + item.title" [title]="action">
+                          <span class="material-icons" aria-hidden="true">{{ item.type === 'audio' ? 'headphones' : 'play_arrow' }}</span>
+                        </button>
+                      }
                       <a class="icon-btn" [href]="item.downloadUrl()" (click)="download($event, item)"
                          [attr.aria-label]="t().download + ': ' + item.title" [title]="t().download">
                         <span class="material-icons" aria-hidden="true">download</span>
@@ -135,8 +143,13 @@
           <span class="material-icons" aria-hidden="true">close</span>
         </button>
       </header>
-      <video #player controls autoplay playsinline [src]="item.playUrl()"
-             (loadedmetadata)="onPlayerLoaded(player)" (error)="onPlayerError(item, player)"></video>
+      @if (item.type === 'audio') {
+        <audio #player controls autoplay [src]="item.playUrl()"
+               (loadedmetadata)="onPlayerLoaded(player)" (error)="onPlayerError(item, player)"></audio>
+      } @else {
+        <video #player controls autoplay playsinline [src]="item.playUrl()"
+               (loadedmetadata)="onPlayerLoaded(player)" (error)="onPlayerError(item, player)"></video>
+      }
       <div class="dialog-foot">
         <div class="speeds" role="group" [attr.aria-label]="t().speed">
           <span class="muted small">{{ t().speed }}</span>

@@ -3,7 +3,7 @@
 // needs a valid Cognito token.
 export const STUDENT_CONFIG = {
   region: 'eu-central-1',
-  userPoolId: 'eu-central-1_2TPqzVZCD',
-  userPoolClientId: '2igk6sno4fg1gs1ar219iefjc6',
+  userPoolId: 'eu-central-1_ayxyse307',
+  userPoolClientId: '741nni16td0vkijj67cv7aqbkk',
   apiUrl: 'https://p2ttsvsi4l.execute-api.eu-central-1.amazonaws.com',
 } as const;

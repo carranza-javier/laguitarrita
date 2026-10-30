@@ -11,8 +11,7 @@ export class StudentAuthError extends Error {
 }
 
 export interface StudentSession {
-  name: string;
-  email: string;
+  username: string;
 }
 
 /**
@@ -48,10 +47,10 @@ export class StudentAuthService {
     return session ? toStudentSession(session) : null;
   }
 
-  async login(email: string, password: string): Promise<StudentSession> {
+  async login(name: string, password: string): Promise<StudentSession> {
     const { AuthenticationDetails, CognitoUser } = await this.lib();
     const pool = await this.pool();
-    const username = email.trim().toLowerCase();
+    const username = name.trim().toLowerCase();
     const user = new CognitoUser({ Username: username, Pool: pool, Storage: window.sessionStorage });
     const session = await new Promise<CognitoUserSession>((resolve, reject) =>
       user.authenticateUser(new AuthenticationDetails({ Username: username, Password: password }), {
@@ -93,8 +92,7 @@ export class StudentAuthService {
 }
 
 function toStudentSession(session: CognitoUserSession): StudentSession {
-  const payload = session.getIdToken().decodePayload();
-  return { name: String(payload['name'] ?? ''), email: String(payload['email'] ?? '') };
+  return { username: String(session.getIdToken().decodePayload()['cognito:username'] ?? '') };
 }
 
 function mapError(err: { code?: string; name?: string; message?: string }): StudentAuthError {

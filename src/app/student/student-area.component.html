@@ -21,9 +21,9 @@
         <p class="muted">{{ t().intro }}</p>
 
         <form (ngSubmit)="submit()" novalidate>
-          <label for="email">{{ t().email }}</label>
-          <input id="email" name="email" type="email" autocomplete="username" inputmode="email"
-                 autocapitalize="none" spellcheck="false" [(ngModel)]="email" [disabled]="busy()" />
+          <label for="username">{{ t().username }}</label>
+          <input id="username" name="username" type="text" autocomplete="username"
+                 autocapitalize="none" autocorrect="off" spellcheck="false" [(ngModel)]="username" [disabled]="busy()" />
 
           <label for="password">{{ t().password }}</label>
           <div class="password">
@@ -51,8 +51,8 @@
     @case ('videos') {
       <section class="videos">
         <h1>{{ t().videosHeading }}</h1>
-        @if (session()?.name) {
-          <p class="muted">{{ t().hello }} {{ session()?.name }}</p>
+        @if (session()?.username) {
+          <p class="muted">{{ t().hello }} {{ session()?.username }}</p>
         }
 
         @if (error(); as e) {

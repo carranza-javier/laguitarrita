@@ -57,7 +57,7 @@ export class StudentAreaComponent {
   protected readonly error = signal<ErrorKey | null>(null);
   protected readonly busy = signal(false);
   protected readonly showPassword = signal(false);
-  protected email = '';
+  protected username = '';
   protected password = '';
 
   private readonly players = viewChildren<ElementRef<HTMLVideoElement>>('player');
@@ -82,11 +82,11 @@ export class StudentAreaComponent {
 
   protected async submit(): Promise<void> {
     if (this.busy()) return;
-    if (!this.email.trim() || !this.password) return this.error.set('missing');
+    if (!this.username.trim() || !this.password) return this.error.set('missing');
     this.busy.set(true);
     this.error.set(null);
     try {
-      this.session.set(await this.auth.login(this.email, this.password));
+      this.session.set(await this.auth.login(this.username, this.password));
       this.password = '';
       this.view.set('videos');
       await this.loadVideos();

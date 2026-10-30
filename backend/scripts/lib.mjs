@@ -12,6 +12,7 @@ import {
   CognitoIdentityProviderClient,
   ListUsersCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { BatchWriteItemCommand, DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 
 export const REGION = process.env.AWS_REGION || 'eu-central-1';
@@ -19,10 +20,11 @@ export const DEFAULT_STACK = process.env.STUDENTS_STACK || 'laguitarrita-student
 
 export const cognito = new CognitoIdentityProviderClient({ region: REGION });
 export const s3 = new S3Client({ region: REGION });
+export const dynamo = new DynamoDBClient({ region: REGION });
 
 const outputsCache = new Map();
 
-/** Reads UserPoolId, UserPoolClientId, BucketName and ApiUrl from the stack outputs. */
+/** Reads UserPoolId, UserPoolClientId, BucketName, NotesTableName and ApiUrl from the stack outputs. */
 export async function stackOutputs(stackName = DEFAULT_STACK) {
   if (!outputsCache.has(stackName)) {
     const cfn = new CloudFormationClient({ region: REGION });
@@ -113,9 +115,39 @@ export async function listVideoObjects({ stack, sub }) {
   return objects;
 }
 
+/** Deletes all of a student's notes; returns how many there were. */
+export async function deleteNotes({ stack, sub }) {
+  const { NotesTableName } = await stackOutputs(stack);
+  const keys = [];
+  let ExclusiveStartKey;
+  do {
+    const page = await dynamo.send(
+      new QueryCommand({
+        TableName: NotesTableName,
+        KeyConditionExpression: '#sub = :sub',
+        ExpressionAttributeNames: { '#sub': 'sub', '#video': 'video' },
+        ExpressionAttributeValues: { ':sub': { S: sub } },
+        ProjectionExpression: '#sub, #video',
+        ExclusiveStartKey,
+      }),
+    );
+    keys.push(...(page.Items ?? []));
+    ExclusiveStartKey = page.LastEvaluatedKey;
+  } while (ExclusiveStartKey);
+  for (let i = 0; i < keys.length; i += 25) {
+    let RequestItems = { [NotesTableName]: keys.slice(i, i + 25).map((Key) => ({ DeleteRequest: { Key } })) };
+    while (RequestItems && Object.keys(RequestItems).length) {
+      ({ UnprocessedItems: RequestItems } = await dynamo.send(new BatchWriteItemCommand({ RequestItems })));
+    }
+  }
+  return keys.length;
+}
+
 export async function deleteStudent({ stack, username, deleteVideos = false }) {
   const { UserPoolId, BucketName } = await stackOutputs(stack);
   const { sub } = await getStudent({ stack, username });
+  // The notes belong to the student's login, so they go with it; the videos are only deleted on request.
+  const notes = await deleteNotes({ stack, sub });
   let deleted = 0;
   if (deleteVideos) {
     const objects = await listVideoObjects({ stack, sub });
@@ -126,7 +158,7 @@ export async function deleteStudent({ stack, username, deleteVideos = false }) {
     }
   }
   await cognito.send(new AdminDeleteUserCommand({ UserPoolId, Username: normalizeUsername(username) }));
-  return { sub, deleted };
+  return { sub, deleted, notes };
 }
 
 /** Finds ffmpeg/ffprobe on PATH (or via FFMPEG_PATH / FFPROBE_PATH). Returns null if missing. */

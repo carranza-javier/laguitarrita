@@ -75,19 +75,22 @@ They live in `LAUNCH_OLD_PRICES` in `prices.component.ts` — set it to `null` t
 
 ## Student area (`/schueler`)
 Students sign in with a username (a pseudonym chosen by the teacher) and a password. They see their
-own class videos as a list grouped by month (newest first) with a search by title, can play them in a
-player with slower speeds (0.5×–1×), download them and write their own notes per video. No e-mail
-addresses or real names are stored anywhere.
+own class materials (videos, audio files and PDFs) as a list grouped by month (newest first) with a
+search by title. Videos and audio files play in a player with slower speeds (0.5×–1×), PDFs open in
+the browser's viewer; everything can be downloaded and students write their own notes per file.
+No e-mail addresses or real names are stored anywhere.
 There is no public sign-up, no password recovery and Cognito never sends a message: the teacher
 manages everything with the scripts below.
 
 - Region `eu-central-1`, stack `laguitarrita-students` (template: `backend/template.yaml`)
-- Videos: `s3://laguitarrita-students-videos-964907375727/students/{cognito-sub}/videos/{file}`.
-  They are permanent (no lifecycle rules, bucket kept even if the stack is deleted).
+- Files: `s3://laguitarrita-students-videos-964907375727/students/{cognito-sub}/videos/{file}` (the
+  folder is called `videos` for all types). Only videos (mp4, m4v, mov, webm, mkv, avi), audio files
+  (mp3, m4a, aac, wav, ogg, flac) and PDFs are shown. They are permanent (no lifecycle rules, bucket
+  kept even if the stack is deleted).
 - Titles are the file names without the extension, so name files the way they should appear
-  (e.g. `Bulerías - compás básico.mp4`). Videos are dated by the recording date stored in the video
-  (kept as S3 metadata `recorded` by the upload script), or by the upload date if there is none.
-- `GET /videos` returns the caller's videos with their note and presigned URLs valid for 1 hour; the
+  (e.g. `Bulerías - compás básico.mp4`). Videos and audio files are dated by the recording date stored
+  in the file (kept as S3 metadata `recorded` by the upload script), PDFs by the upload date.
+- `GET /videos` returns the caller's files with their type, note and presigned URLs valid for 1 hour; the
   page asks for new ones transparently when they expire. `PUT /notes {video, text}` saves a note
   (max. 5000 characters; empty deletes it) in the DynamoDB table `laguitarrita-students-notes`.
 - Public frontend config (pool id, client id, API URL): `src/app/student/student-config.ts`.
@@ -106,9 +109,9 @@ cd backend
 # Create a student (permanent password, no message is sent). Prints the student's sub.
 node scripts/create-student.mjs --username USERNAME --password "PASSWORD"
 
-# Upload videos (files and/or folders). With ffmpeg, videos above 480p are re-encoded to 480p
-# with +faststart; 480p or smaller are uploaded unchanged. The recording date is kept.
-# Existing files are skipped unless --overwrite.
+# Upload videos, audio files and PDFs (files and/or folders). With ffmpeg, videos above 480p are
+# re-encoded to 480p with +faststart; everything else is uploaded unchanged. The recording date is
+# kept. Existing files are skipped unless --overwrite.
 node scripts/upload-videos.mjs --username USERNAME "C:/Videos/clase-01.mp4" "C:/Videos/USERNAME/"
 
 # Set a new password (also signs the student out everywhere)

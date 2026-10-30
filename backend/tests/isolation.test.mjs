@@ -9,7 +9,7 @@ import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createSign, generateKeyPairSync, randomBytes } from 'node:crypto';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +20,7 @@ import {
   DescribeUserPoolCommand,
   UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import {
   cognito,
   createStudent,
@@ -28,6 +29,7 @@ import {
   findTool,
   listVideoObjects,
   normalizeUsername,
+  s3,
   stackOutputs,
 } from '../scripts/lib.mjs';
 
@@ -62,6 +64,17 @@ const api = (path, token, init = {}) =>
   });
 
 const RECORDED = '2025-03-14T10:00:00.000Z';
+const AUDIO_RECORDED = '2025-06-01T09:00:00.000Z';
+
+// Smallest useful PDF: one empty page.
+const PDF = [
+  '%PDF-1.4',
+  '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj',
+  '3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj',
+  'trailer<</Root 1 0 R>>',
+  '%%EOF',
+  '',
+].join('\n');
 
 function makeVideo(file, size, metadata = []) {
   const ffmpeg = findTool('ffmpeg');
@@ -92,9 +105,20 @@ before(async () => {
   // Must be re-encoded to 480p and keep its recording date.
   makeVideo(join(workDir, 'clase-720p.mp4'), '1280x720', ['-metadata', `creation_time=${RECORDED}`]);
   makeVideo(join(workDir, 'clase-360p.mp4'), '640x360'); // must be uploaded unchanged; no date: upload date
+  // Audio with a 720p cover image: must be uploaded unchanged (covers are not videos) and keep its date.
+  const audio = spawnSync(findTool('ffmpeg'), ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'sine=frequency=330:duration=2',
+    '-f', 'lavfi', '-i', 'testsrc=size=1280x720:duration=1', '-map', '0:a', '-map', '1:v', '-frames:v', '1', '-c:a', 'aac',
+    '-c:v', 'mjpeg', '-disposition:v', 'attached_pic', '-metadata', `creation_time=${AUDIO_RECORDED}`,
+    join(workDir, 'audio-clase.m4a')]);
+  assert.equal(audio.status, 0, 'ffmpeg could not create the test audio');
+  writeFileSync(join(workDir, 'partitura.pdf'), PDF);
+  writeFileSync(join(workDir, 'apuntes.docx'), 'not uploaded: Word files are not supported');
   const upload = spawnSync(process.execPath, [join(scriptsDir, 'upload-videos.mjs'), '--username', studentA.username,
     '--stack', STACK, workDir], { encoding: 'utf8' });
   assert.equal(upload.status, 0, upload.stderr);
+  // A file of another type that ends up in the folder anyway must never be listed.
+  await s3.send(new PutObjectCommand({ Bucket: out.BucketName, Key: `students/${studentA.sub}/videos/page.html`,
+    Body: '<script>alert(1)</script>', ContentType: 'text/html' }));
 
   [tokenA, tokenB] = await Promise.all([login(studentA), login(studentB)]);
 });
@@ -182,7 +206,8 @@ describe('isolation', () => {
     assert.equal(res.headers.get('access-control-allow-origin'), ORIGIN);
     const { videos, expiresIn } = await res.json();
     assert.equal(expiresIn, 3600);
-    assert.deepEqual(videos.map((v) => v.name).sort(), ['clase-360p.mp4', 'clase-720p.mp4']);
+    assert.deepEqual(videos.map((v) => v.name).sort(),
+      ['audio-clase.m4a', 'clase-360p.mp4', 'clase-720p.mp4', 'partitura.pdf']);
 
     for (const v of videos) {
       assert.ok(v.playUrl.includes(`students/${studentA.sub}/videos/`));
@@ -193,7 +218,7 @@ describe('isolation', () => {
       await play.arrayBuffer();
       const dl = await fetch(v.downloadUrl);
       assert.equal(dl.status, 200);
-      assert.match(dl.headers.get('content-disposition'), /^attachment; filename="clase-\d+p\.mp4"/);
+      assert.match(dl.headers.get('content-disposition'), /^attachment; filename="[\w.-]+"/);
       assert.equal((await dl.arrayBuffer()).byteLength, v.size);
     }
   });
@@ -213,11 +238,36 @@ describe('isolation', () => {
     assert.equal(head.subarray(ftypSize + 4, ftypSize + 8).toString(), 'moov');
   });
 
-  test('videos carry the recording date (or the upload date) and are sorted newest first', async () => {
+  test('files carry the recording date (or the upload date) and are sorted newest first', async () => {
     const { videos } = await (await api('/videos', tokenA)).json();
-    assert.deepEqual(videos.map((v) => v.name), ['clase-360p.mp4', 'clase-720p.mp4']);
-    assert.equal(videos[1].date, RECORDED);
-    assert.ok(Date.now() - Date.parse(videos[0].date) < 30 * 60 * 1000, 'upload date expected');
+    assert.deepEqual(videos.slice(-2).map((v) => [v.name, v.date]),
+      [['audio-clase.m4a', AUDIO_RECORDED], ['clase-720p.mp4', RECORDED]]);
+    for (const v of videos.slice(0, -2)) {
+      assert.ok(Date.now() - Date.parse(v.date) < 30 * 60 * 1000, `upload date expected for ${v.name}`);
+    }
+  });
+
+  test('audio files and PDFs are listed with their type and uploaded unchanged', async () => {
+    const { videos } = await (await api('/videos', tokenA)).json();
+    const byName = Object.fromEntries(videos.map((v) => [v.name, v]));
+    assert.deepEqual(
+      Object.fromEntries(videos.map((v) => [v.name, v.type])),
+      { 'audio-clase.m4a': 'audio', 'clase-360p.mp4': 'video', 'clase-720p.mp4': 'video', 'partitura.pdf': 'pdf' },
+    );
+    for (const name of ['audio-clase.m4a', 'partitura.pdf']) {
+      assert.equal(byName[name].size, statSync(join(workDir, name)).size, `${name} unchanged`);
+    }
+    const audio = await fetch(byName['audio-clase.m4a'].playUrl);
+    assert.equal(audio.headers.get('content-type'), 'audio/mp4');
+    await audio.arrayBuffer();
+    // The PDF opens in the browser's viewer (inline) and downloads as a file.
+    const view = await fetch(byName['partitura.pdf'].playUrl);
+    assert.equal(view.headers.get('content-type'), 'application/pdf');
+    assert.match(view.headers.get('content-disposition'), /^inline; filename="partitura\.pdf"/);
+    assert.equal(await view.text(), PDF);
+    const dl = await fetch(byName['partitura.pdf'].downloadUrl);
+    assert.match(dl.headers.get('content-disposition'), /^attachment; filename="partitura\.pdf"/);
+    await dl.arrayBuffer();
   });
 
   test('B gets an empty list', async () => {

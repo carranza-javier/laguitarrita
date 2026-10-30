@@ -74,16 +74,22 @@ They live in `LAUNCH_OLD_PRICES` in `prices.component.ts` — set it to `null` t
 - Keep it simple — just reach out directly
 
 ## Student area (`/schueler`)
-Students sign in with a username (a pseudonym chosen by the teacher) and a password, and can watch
-and download only their own class videos. No e-mail addresses or real names are stored anywhere.
+Students sign in with a username (a pseudonym chosen by the teacher) and a password. They see their
+own class videos as a list grouped by month (newest first) with a search by title, can play them in a
+player with slower speeds (0.5×–1×), download them and write their own notes per video. No e-mail
+addresses or real names are stored anywhere.
 There is no public sign-up, no password recovery and Cognito never sends a message: the teacher
 manages everything with the scripts below.
 
 - Region `eu-central-1`, stack `laguitarrita-students` (template: `backend/template.yaml`)
 - Videos: `s3://laguitarrita-students-videos-964907375727/students/{cognito-sub}/videos/{file}`.
   They are permanent (no lifecycle rules, bucket kept even if the stack is deleted).
-- `GET /videos` returns the caller's videos with presigned URLs valid for 1 hour; the page asks for
-  new ones transparently when they expire.
+- Titles are the file names without the extension, so name files the way they should appear
+  (e.g. `Bulerías - compás básico.mp4`). Videos are dated by the recording date stored in the video
+  (kept as S3 metadata `recorded` by the upload script), or by the upload date if there is none.
+- `GET /videos` returns the caller's videos with their note and presigned URLs valid for 1 hour; the
+  page asks for new ones transparently when they expire. `PUT /notes {video, text}` saves a note
+  (max. 5000 characters; empty deletes it) in the DynamoDB table `laguitarrita-students-notes`.
 - Public frontend config (pool id, client id, API URL): `src/app/student/student-config.ts`.
 
 ### Admin scripts
@@ -101,7 +107,8 @@ cd backend
 node scripts/create-student.mjs --username USERNAME --password "PASSWORD"
 
 # Upload videos (files and/or folders). With ffmpeg, videos above 480p are re-encoded to 480p
-# with +faststart; 480p or smaller are uploaded unchanged. Existing files are skipped unless --overwrite.
+# with +faststart; 480p or smaller are uploaded unchanged. The recording date is kept.
+# Existing files are skipped unless --overwrite.
 node scripts/upload-videos.mjs --username USERNAME "C:/Videos/clase-01.mp4" "C:/Videos/USERNAME/"
 
 # Set a new password (also signs the student out everywhere)
@@ -110,7 +117,7 @@ node scripts/reset-password.mjs --username USERNAME --password "NEW_PASSWORD"
 # List students (username, sub and number of videos)
 node scripts/list-students.mjs
 
-# Delete a student's login; add --delete-videos to also delete their folder
+# Delete a student's login and notes; add --delete-videos to also delete their folder
 node scripts/delete-student.mjs --username USERNAME [--delete-videos]
 ```
 
@@ -128,8 +135,8 @@ sam build && sam deploy --config-env test    # throwaway test stack laguitarrita
 ### Tests
 `npm run test:integration` (in `backend/`, needs ffmpeg) creates two temporary students on the stack
 named by `STUDENTS_STACK` (default `laguitarrita-students-test`), checks that requests without a valid
-token get 401, that student B can never see or download student A's videos and that the user pool
-stores nothing but a username and a sub, then deletes them.
+token get 401, that student B can never see, download or annotate student A's videos, that notes and
+recording dates work and that the user pool stores nothing but a username and a sub, then deletes them.
 
 To remove the test stack: empty and delete its bucket (it is retained) after
 `aws cloudformation delete-stack --stack-name laguitarrita-students-test`.

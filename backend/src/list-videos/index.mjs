@@ -18,9 +18,21 @@ const json = (statusCode, body) => ({
   body: JSON.stringify(body),
 });
 
-const contentDisposition = (fileName) => {
+// Only these kinds of files are listed; anything else in the folder is ignored.
+const TYPES = {
+  video: ['.mp4', '.m4v', '.mov', '.webm', '.mkv', '.avi'],
+  audio: ['.mp3', '.m4a', '.aac', '.wav', '.ogg', '.flac'],
+  pdf: ['.pdf'],
+};
+
+const fileType = (name) => {
+  const ext = name.slice(name.lastIndexOf('.')).toLowerCase();
+  return Object.keys(TYPES).find((type) => TYPES[type].includes(ext));
+};
+
+const contentDisposition = (fileName, disposition = 'attachment') => {
   const ascii = fileName.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
-  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
+  return `${disposition}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
 };
 
 export const handler = async (event) => {
@@ -43,15 +55,24 @@ export const handler = async (event) => {
     continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
   } while (continuationToken);
 
-  const files = objects.filter((o) => o.Size > 0 && !o.Key.slice(prefix.length).includes('/'));
+  const files = objects.filter((o) => {
+    const name = o.Key.slice(prefix.length);
+    return o.Size > 0 && !name.includes('/') && fileType(name);
+  });
   const notes = await loadNotes(sub);
 
   const videos = await Promise.all(
     files.map(async (o) => {
       const name = o.Key.slice(prefix.length);
+      const type = fileType(name);
+      // PDFs open in the browser's own viewer, so their "play" URL is served inline as a PDF.
+      const view =
+        type === 'pdf'
+          ? { ResponseContentType: 'application/pdf', ResponseContentDisposition: contentDisposition(name, 'inline') }
+          : {};
       const [date, playUrl, downloadUrl] = await Promise.all([
         recordedAt(o),
-        getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: o.Key }), {
+        getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: o.Key, ...view }), {
           expiresIn: URL_TTL_SECONDS,
         }),
         getSignedUrl(
@@ -64,7 +85,7 @@ export const handler = async (event) => {
           { expiresIn: URL_TTL_SECONDS },
         ),
       ]);
-      return { name, date, size: o.Size, playUrl, downloadUrl, note: notes.get(name) ?? '' };
+      return { name, type, date, size: o.Size, playUrl, downloadUrl, note: notes.get(name) ?? '' };
     }),
   );
 
@@ -72,7 +93,7 @@ export const handler = async (event) => {
   return json(200, { videos, expiresIn: URL_TTL_SECONDS });
 };
 
-/** Recording date stored by the upload script (from the video's own metadata), else the upload date. */
+/** Recording date stored by the upload script (from the file's own metadata), else the upload date. */
 async function recordedAt(object) {
   const head = await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: object.Key }));
   const recorded = Date.parse(head.Metadata?.recorded ?? '');

@@ -85,3 +85,9 @@ section:not(#hero) {
     --section-pad: 64px 20px;
   }
 }
+
+// Student area entry of the mobile navbar menu (rendered in the overlay, outside the component).
+.mobile-menu .student-item,
+.mobile-menu .student-item .mat-icon {
+  color: var(--accent);
+}

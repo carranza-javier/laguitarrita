@@ -10,6 +10,7 @@ const TRANSLATIONS = {
       concerts: 'Konzerte',
       prices: 'Preise',
       contact: 'Kontakt',
+      studentArea: 'Schülerbereich',
     },
     hero: {
       name: 'Javier Carranza',
@@ -142,6 +143,7 @@ const TRANSLATIONS = {
       concerts: 'Concerts',
       prices: 'Prices',
       contact: 'Contact',
+      studentArea: 'Student area',
     },
     hero: {
       name: 'Javier Carranza',

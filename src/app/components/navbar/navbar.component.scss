@@ -98,6 +98,31 @@
   to { color: rgba(255, 255, 255, 0.75); }
 }
 
+// Student area: always in the accent colour, also over the hero video.
+.student-link {
+  margin-left: 4px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--accent) !important;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0 14px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+  }
+}
+
+.student-icon {
+  display: none;
+  color: var(--accent) !important;
+}
+
 .menu-btn {
   display: none;
   color: var(--text);
@@ -116,8 +141,13 @@
 
 @media (max-width: 720px) {
   .nav-links,
-  .lang-toggle {
+  .lang-toggle,
+  .student-link {
     display: none;
+  }
+
+  .student-icon {
+    display: inline-flex;
   }
 
   .menu-btn {

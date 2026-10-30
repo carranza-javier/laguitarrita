@@ -9,12 +9,13 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { DEFAULT_STACK, findTool, getStudent, run, s3, stackOutputs, usageError, videosPrefix } from './lib.mjs';
 
 const usage = `Usage: node scripts/upload-videos.mjs --username <username> <file-or-folder> [...] [--overwrite] [--stack <name>]
-  Uploads videos to the student's private folder. Folders are expanded to the video files they contain.
-  With ffmpeg installed, videos larger than 480p are re-encoded to 480p H.264 with +faststart first;
-  videos that are already 480p or smaller are uploaded unchanged. Existing files are skipped unless --overwrite.
-  The recording date stored in the video (if any) is kept so the page can group videos by month.`;
+  Uploads videos, audio files and PDFs to the student's private folder. Folders are expanded to the
+  supported files they contain. With ffmpeg installed, videos larger than 480p are re-encoded to 480p
+  H.264 with +faststart first; videos that are already 480p or smaller, audio files and PDFs are
+  uploaded unchanged. Existing files are skipped unless --overwrite.
+  The recording date stored in videos and audio files (if any) is kept so the page can group them by month.`;
 
-const CONTENT_TYPES = {
+const VIDEO_TYPES = {
   '.mp4': 'video/mp4',
   '.m4v': 'video/mp4',
   '.mov': 'video/quicktime',
@@ -23,17 +24,32 @@ const CONTENT_TYPES = {
   '.avi': 'video/x-msvideo',
 };
 
+// Keep in sync with TYPES in src/list-videos/index.mjs (other files are not shown to the student).
+const CONTENT_TYPES = {
+  ...VIDEO_TYPES,
+  '.mp3': 'audio/mpeg',
+  '.m4a': 'audio/mp4',
+  '.aac': 'audio/aac',
+  '.wav': 'audio/wav',
+  '.ogg': 'audio/ogg',
+  '.flac': 'audio/flac',
+  '.pdf': 'application/pdf',
+};
+
 const TARGET_HEIGHT = 480;
 
+const supported = (file) => Boolean(CONTENT_TYPES[extname(file).toLowerCase()]);
+
 function expandInputs(inputs) {
-  return inputs.flatMap((p) =>
-    statSync(p).isDirectory()
-      ? readdirSync(p)
-          .filter((f) => CONTENT_TYPES[extname(f).toLowerCase()])
-          .sort()
-          .map((f) => join(p, f))
-      : [p],
-  );
+  return inputs.flatMap((p) => {
+    if (statSync(p).isDirectory()) {
+      return readdirSync(p).filter(supported).sort().map((f) => join(p, f));
+    }
+    if (!supported(p)) {
+      throw new Error(`Unsupported file type: ${basename(p)} (videos, audio files and PDFs only).`);
+    }
+    return [p];
+  });
 }
 
 /** Shorter side of the first video stream (480 for both 854x480 and 480x854). */
@@ -102,7 +118,7 @@ run(async () => {
   if (!values.username || !positionals.length) throw usageError();
 
   const files = expandInputs(positionals);
-  if (!files.length) throw new Error('No video files found.');
+  if (!files.length) throw new Error('No videos, audio files or PDFs found.');
 
   const { BucketName } = await stackOutputs(values.stack);
   const { sub, username } = await getStudent({ stack: values.stack, username: values.username });
@@ -117,8 +133,11 @@ run(async () => {
     for (const file of files) {
       let source = file;
       let fileName = basename(file);
-      const side = ffmpeg && ffprobe ? shortSide(ffprobe, file) : null;
-      const recorded = ffprobe ? recordingDate(ffprobe, file) : null;
+      const ext = extname(file).toLowerCase();
+      const isVideo = Boolean(VIDEO_TYPES[ext]);
+      // Only videos are ever re-encoded (an audio file's cover image is not a video).
+      const side = isVideo && ffmpeg && ffprobe ? shortSide(ffprobe, file) : null;
+      const recorded = ffprobe && ext !== '.pdf' ? recordingDate(ffprobe, file) : null;
       if (side && side > TARGET_HEIGHT) {
         fileName = `${basename(file, extname(file))}.mp4`;
         source = join(workDir, fileName);

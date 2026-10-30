@@ -28,16 +28,18 @@ Globals:
 
 Resources:
   # ---------------------------------------------------------------- Auth
-  StudentsUserPool:
+  # Students sign in with a pseudonymous username chosen by the teacher: no e-mail, phone or name
+  # attributes are required or stored, nothing is verified and Cognito never sends a message.
+  # (Sign-in options are immutable: this replaced the e-mail based pool StudentsUserPool.)
+  StudentsUsernamePool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub ${AWS::StackName}-users
+      UserPoolName: !Sub ${AWS::StackName}-students
       UserPoolTier: LITE
       DeletionProtection: !If [IsProd, ACTIVE, INACTIVE]
       # No self-sign-up: only the teacher creates students (AdminCreateUser).
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: true
-      UsernameAttributes: [email]
       UsernameConfiguration:
         CaseSensitive: false
       # No self-service recovery and no e-mails: passwords are reset by the admin script.
@@ -59,13 +61,16 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: !Sub ${AWS::StackName}-web
-      UserPoolId: !Ref StudentsUserPool
+      UserPoolId: !Ref StudentsUsernamePool
       GenerateSecret: false
       # SRP only: the password itself never leaves the browser.
       ExplicitAuthFlows:
         - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
       PreventUserExistenceErrors: ENABLED
+      # Students cannot add attributes (e-mail, name, ...) to their own profile. An empty list would
+      # mean "all attributes", so only the harmless updated_at timestamp is writable.
+      WriteAttributes: [updated_at]
       EnableTokenRevocation: true
       SupportedIdentityProviders: [COGNITO]
       AuthSessionValidity: 3
@@ -141,7 +146,7 @@ Resources:
           CognitoJwt:
             IdentitySource: $request.header.Authorization
             JwtConfiguration:
-              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${StudentsUserPool}
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${StudentsUsernamePool}
               audience:
                 - !Ref StudentsUserPoolClient
 
@@ -185,7 +190,7 @@ Outputs:
   Region:
     Value: !Ref AWS::Region
   UserPoolId:
-    Value: !Ref StudentsUserPool
+    Value: !Ref StudentsUsernamePool
   UserPoolClientId:
     Value: !Ref StudentsUserPoolClient
   BucketName:

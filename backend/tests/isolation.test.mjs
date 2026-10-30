@@ -23,6 +23,7 @@ import {
 import {
   cognito,
   createStudent,
+  deleteNotes,
   deleteStudent,
   findTool,
   listVideoObjects,
@@ -60,10 +61,13 @@ const api = (path, token, init = {}) =>
     headers: { origin: ORIGIN, ...(token ? { authorization: `Bearer ${token}` } : {}), ...init.headers },
   });
 
-function makeVideo(file, size) {
+const RECORDED = '2025-03-14T10:00:00.000Z';
+
+function makeVideo(file, size, metadata = []) {
   const ffmpeg = findTool('ffmpeg');
   const res = spawnSync(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `testsrc=size=${size}:rate=25`,
-    '-f', 'lavfi', '-i', 'sine=frequency=440', '-t', '2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', file]);
+    '-f', 'lavfi', '-i', 'sine=frequency=440', '-t', '2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest',
+    ...metadata, file]);
   assert.equal(res.status, 0, 'ffmpeg could not create the test video');
 }
 
@@ -85,8 +89,9 @@ before(async () => {
   studentB.sub = await createStudent({ stack: STACK, ...studentB });
 
   workDir = mkdtempSync(join(tmpdir(), 'laguitarrita-test-'));
-  makeVideo(join(workDir, 'clase-720p.mp4'), '1280x720'); // must be re-encoded to 480p
-  makeVideo(join(workDir, 'clase-360p.mp4'), '640x360'); // must be uploaded unchanged
+  // Must be re-encoded to 480p and keep its recording date.
+  makeVideo(join(workDir, 'clase-720p.mp4'), '1280x720', ['-metadata', `creation_time=${RECORDED}`]);
+  makeVideo(join(workDir, 'clase-360p.mp4'), '640x360'); // must be uploaded unchanged; no date: upload date
   const upload = spawnSync(process.execPath, [join(scriptsDir, 'upload-videos.mjs'), '--username', studentA.username,
     '--stack', STACK, workDir], { encoding: 'utf8' });
   assert.equal(upload.status, 0, upload.stderr);
@@ -208,6 +213,13 @@ describe('isolation', () => {
     assert.equal(head.subarray(ftypSize + 4, ftypSize + 8).toString(), 'moov');
   });
 
+  test('videos carry the recording date (or the upload date) and are sorted newest first', async () => {
+    const { videos } = await (await api('/videos', tokenA)).json();
+    assert.deepEqual(videos.map((v) => v.name), ['clase-360p.mp4', 'clase-720p.mp4']);
+    assert.equal(videos[1].date, RECORDED);
+    assert.ok(Date.now() - Date.parse(videos[0].date) < 30 * 60 * 1000, 'upload date expected');
+  });
+
   test('B gets an empty list', async () => {
     const res = await api('/videos', tokenB);
     assert.equal(res.status, 200);
@@ -247,5 +259,72 @@ describe('isolation', () => {
     assert.equal(ok.headers.get('access-control-allow-origin'), ORIGIN);
     const bad = await preflight('https://evil.example');
     assert.equal(bad.headers.get('access-control-allow-origin'), null);
+  });
+});
+
+describe('notes', () => {
+  const putNote = (token, body) =>
+    api('/notes', token, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: typeof body === 'string' ? body : JSON.stringify(body),
+    });
+  const noteOf = async (token, name) =>
+    (await (await api('/videos', token)).json()).videos.find((v) => v.name === name)?.note;
+
+  test('A saves a note on their own video and gets it back with the list', async () => {
+    const text = 'Compás 12: más lento. Üben mit 80 bpm';
+    const res = await putNote(tokenA, { video: 'clase-720p.mp4', text });
+    assert.equal(res.status, 200);
+    assert.equal(await noteOf(tokenA, 'clase-720p.mp4'), text);
+    assert.equal(await noteOf(tokenA, 'clase-360p.mp4'), '');
+  });
+
+  test("B cannot write a note on A's video, and A's note is untouched", async () => {
+    assert.equal((await putNote(tokenB, { video: 'clase-720p.mp4', text: 'hacked' })).status, 404);
+    for (const video of [`../${studentA.sub}/videos/clase-720p.mp4`, `students/${studentA.sub}/videos/clase-720p.mp4`]) {
+      assert.equal((await putNote(tokenB, { video, text: 'hacked' })).status, 400);
+    }
+    assert.match(await noteOf(tokenA, 'clase-720p.mp4'), /^Compás 12/);
+    const { videos } = await (await api('/videos', tokenB)).json();
+    assert.deepEqual(videos, []);
+  });
+
+  test('saving notes requires a valid token', async () => {
+    assert.equal((await putNote(undefined, { video: 'clase-720p.mp4', text: 'x' })).status, 401);
+    assert.equal((await putNote('not-a-jwt', { video: 'clase-720p.mp4', text: 'x' })).status, 401);
+    const forged = forgeJwt({ ...decode(tokenA), exp: Math.floor(Date.now() / 1000) + 600 });
+    assert.equal((await putNote(forged, { video: 'clase-720p.mp4', text: 'x' })).status, 401);
+  });
+
+  test('invalid requests are rejected', async () => {
+    assert.equal((await putNote(tokenA, 'not json')).status, 400);
+    assert.equal((await putNote(tokenA, { video: 'clase-720p.mp4' })).status, 400);
+    assert.equal((await putNote(tokenA, { video: 'clase-720p.mp4', text: 'x'.repeat(5001) })).status, 400);
+    assert.equal((await putNote(tokenA, { video: 'missing.mp4', text: 'x' })).status, 404);
+  });
+
+  test('an empty note deletes it', async () => {
+    assert.equal((await putNote(tokenA, { video: 'clase-720p.mp4', text: '  ' })).status, 200);
+    assert.equal(await noteOf(tokenA, 'clase-720p.mp4'), '');
+  });
+
+  test("deleting a student's notes (done by delete-student) removes them", async () => {
+    await putNote(tokenA, { video: 'clase-360p.mp4', text: 'to be deleted' });
+    assert.equal(await deleteNotes({ stack: STACK, sub: studentA.sub }), 1);
+    assert.equal(await noteOf(tokenA, 'clase-360p.mp4'), '');
+  });
+
+  test('CORS preflight allows PUT with a JSON body from laguitarrita.ch', async () => {
+    const res = await fetch(`${out.ApiUrl}/notes`, {
+      method: 'OPTIONS',
+      headers: {
+        origin: ORIGIN,
+        'access-control-request-method': 'PUT',
+        'access-control-request-headers': 'authorization,content-type',
+      },
+    });
+    assert.equal(res.headers.get('access-control-allow-origin'), ORIGIN);
+    assert.match(res.headers.get('access-control-allow-methods') ?? '', /PUT/);
   });
 });

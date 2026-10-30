@@ -33,7 +33,17 @@ export async function stackOutputs(stackName = DEFAULT_STACK) {
   return outputsCache.get(stackName);
 }
 
-export const normalizeEmail = (email) => String(email ?? '').trim().toLowerCase();
+// Pseudonyms only: no e-mail addresses or real names are stored anywhere.
+const USERNAME_PATTERN = /^[a-z0-9._-]{3,32}$/;
+
+/** Lower-cases the username and checks it is simple: letters, digits, '.', '-', '_' (3-32). */
+export function normalizeUsername(username) {
+  const value = String(username ?? '').trim().toLowerCase();
+  if (!USERNAME_PATTERN.test(value)) {
+    throw new Error('The username must be 3-32 characters: letters, digits, ".", "-" or "_".');
+  }
+  return value;
+}
 
 export function assertPassword(password) {
   if (typeof password !== 'string' || password.length < 8) {
@@ -43,41 +53,35 @@ export function assertPassword(password) {
 
 export const videosPrefix = (sub) => `students/${sub}/videos/`;
 
-export async function createStudent({ stack, email, name, password }) {
+export async function createStudent({ stack, username, password }) {
   const { UserPoolId } = await stackOutputs(stack);
-  email = normalizeEmail(email);
+  username = normalizeUsername(username);
   assertPassword(password);
-  const attributes = [
-    { Name: 'email', Value: email },
-    { Name: 'email_verified', Value: 'true' },
-  ];
-  if (name) attributes.push({ Name: 'name', Value: name });
   const { User } = await cognito.send(
     new AdminCreateUserCommand({
       UserPoolId,
-      Username: email,
-      UserAttributes: attributes,
-      MessageAction: 'SUPPRESS', // never send the Cognito invitation e-mail
+      Username: username,
+      MessageAction: 'SUPPRESS', // never send any Cognito message
     }),
   );
-  await setPermanentPassword({ stack, email, password, signOut: false });
+  await setPermanentPassword({ stack, username, password, signOut: false });
   return User.Attributes.find((a) => a.Name === 'sub').Value;
 }
 
-export async function setPermanentPassword({ stack, email, password, signOut = true }) {
+export async function setPermanentPassword({ stack, username, password, signOut = true }) {
   const { UserPoolId } = await stackOutputs(stack);
   assertPassword(password);
-  const Username = normalizeEmail(email);
+  const Username = normalizeUsername(username);
   await cognito.send(new AdminSetUserPasswordCommand({ UserPoolId, Username, Password: password, Permanent: true }));
   // Invalidate refresh tokens issued with the old password.
   if (signOut) await cognito.send(new AdminUserGlobalSignOutCommand({ UserPoolId, Username }));
 }
 
-export async function getStudent({ stack, email }) {
+export async function getStudent({ stack, username }) {
   const { UserPoolId } = await stackOutputs(stack);
-  const user = await cognito.send(new AdminGetUserCommand({ UserPoolId, Username: normalizeEmail(email) }));
-  const attr = (n) => user.UserAttributes.find((a) => a.Name === n)?.Value;
-  return { sub: attr('sub'), email: attr('email'), name: attr('name'), status: user.UserStatus };
+  const user = await cognito.send(new AdminGetUserCommand({ UserPoolId, Username: normalizeUsername(username) }));
+  const sub = user.UserAttributes.find((a) => a.Name === 'sub')?.Value;
+  return { sub, username: user.Username, status: user.UserStatus };
 }
 
 export async function listStudents({ stack }) {
@@ -90,8 +94,8 @@ export async function listStudents({ stack }) {
     PaginationToken = page.PaginationToken;
   } while (PaginationToken);
   return users.map((u) => {
-    const attr = (n) => u.Attributes.find((a) => a.Name === n)?.Value;
-    return { sub: attr('sub'), email: attr('email'), name: attr('name') ?? '', created: u.UserCreateDate };
+    const sub = u.Attributes.find((a) => a.Name === 'sub')?.Value;
+    return { sub, username: u.Username, created: u.UserCreateDate };
   });
 }
 
@@ -109,9 +113,9 @@ export async function listVideoObjects({ stack, sub }) {
   return objects;
 }
 
-export async function deleteStudent({ stack, email, deleteVideos = false }) {
+export async function deleteStudent({ stack, username, deleteVideos = false }) {
   const { UserPoolId, BucketName } = await stackOutputs(stack);
-  const { sub } = await getStudent({ stack, email });
+  const { sub } = await getStudent({ stack, username });
   let deleted = 0;
   if (deleteVideos) {
     const objects = await listVideoObjects({ stack, sub });
@@ -121,7 +125,7 @@ export async function deleteStudent({ stack, email, deleteVideos = false }) {
       deleted += chunk.length;
     }
   }
-  await cognito.send(new AdminDeleteUserCommand({ UserPoolId, Username: normalizeEmail(email) }));
+  await cognito.send(new AdminDeleteUserCommand({ UserPoolId, Username: normalizeUsername(username) }));
   return { sub, deleted };
 }
 

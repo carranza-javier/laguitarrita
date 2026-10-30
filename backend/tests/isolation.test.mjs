@@ -14,25 +14,39 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AuthenticationDetails, CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js';
-import { createStudent, deleteStudent, findTool, listVideoObjects, stackOutputs } from '../scripts/lib.mjs';
+import {
+  AdminGetUserCommand,
+  DescribeUserPoolClientCommand,
+  DescribeUserPoolCommand,
+  UpdateUserAttributesCommand,
+} from '@aws-sdk/client-cognito-identity-provider';
+import {
+  cognito,
+  createStudent,
+  deleteStudent,
+  findTool,
+  listVideoObjects,
+  normalizeUsername,
+  stackOutputs,
+} from '../scripts/lib.mjs';
 
 const STACK = process.env.STUDENTS_STACK;
 const ORIGIN = 'https://laguitarrita.ch';
 const scriptsDir = fileURLToPath(new URL('../scripts/', import.meta.url));
 const runId = randomBytes(4).toString('hex');
-const studentA = { email: `test-a-${runId}@example.com`, name: 'Test A', password: `pw-a-${runId}` };
-const studentB = { email: `test-b-${runId}@example.com`, name: 'Test B', password: `pw-b-${runId}` };
+const studentA = { username: `test-a-${runId}`, password: `pw-a-${runId}` };
+const studentB = { username: `test-b-${runId}`, password: `pw-b-${runId}` };
 
 let out;
 let workDir;
 let tokenA;
 let tokenB;
 
-function login({ email, password }) {
+function login({ username, password }) {
   const pool = new CognitoUserPool({ UserPoolId: out.UserPoolId, ClientId: out.UserPoolClientId });
-  const user = new CognitoUser({ Username: email, Pool: pool });
+  const user = new CognitoUser({ Username: username, Pool: pool });
   return new Promise((resolve, reject) =>
-    user.authenticateUser(new AuthenticationDetails({ Username: email, Password: password }), {
+    user.authenticateUser(new AuthenticationDetails({ Username: username, Password: password }), {
       onSuccess: (session) => resolve(session.getAccessToken().getJwtToken()),
       onFailure: reject,
       newPasswordRequired: () => reject(new Error('unexpected newPasswordRequired challenge')),
@@ -73,7 +87,7 @@ before(async () => {
   workDir = mkdtempSync(join(tmpdir(), 'laguitarrita-test-'));
   makeVideo(join(workDir, 'clase-720p.mp4'), '1280x720'); // must be re-encoded to 480p
   makeVideo(join(workDir, 'clase-360p.mp4'), '640x360'); // must be uploaded unchanged
-  const upload = spawnSync(process.execPath, [join(scriptsDir, 'upload-videos.mjs'), '--email', studentA.email,
+  const upload = spawnSync(process.execPath, [join(scriptsDir, 'upload-videos.mjs'), '--username', studentA.username,
     '--stack', STACK, workDir], { encoding: 'utf8' });
   assert.equal(upload.status, 0, upload.stderr);
 
@@ -82,7 +96,7 @@ before(async () => {
 
 after(async () => {
   for (const s of [studentA, studentB]) {
-    if (s.sub) await deleteStudent({ stack: STACK, email: s.email, deleteVideos: true }).catch(() => {});
+    if (s.sub) await deleteStudent({ stack: STACK, username: s.username, deleteVideos: true }).catch(() => {});
   }
   if (workDir) rmSync(workDir, { recursive: true, force: true });
 });
@@ -108,7 +122,51 @@ describe('authentication', () => {
   });
 
   test('wrong password is rejected by Cognito', async () => {
-    await assert.rejects(login({ email: studentA.email, password: 'wrong-password' }), { code: 'NotAuthorizedException' });
+    await assert.rejects(login({ username: studentA.username, password: 'wrong-password' }), { code: 'NotAuthorizedException' });
+  });
+});
+
+describe('user pool (pseudonymous usernames)', () => {
+  test('sign-in by username only: no e-mail/phone, no required attributes, no verification, no sign-up', async () => {
+    const { UserPool: pool } = await cognito.send(new DescribeUserPoolCommand({ UserPoolId: out.UserPoolId }));
+    assert.equal(pool.UsernameAttributes, undefined);
+    assert.equal(pool.AliasAttributes, undefined);
+    assert.deepEqual(pool.AutoVerifiedAttributes ?? [], []);
+    assert.deepEqual(pool.SchemaAttributes.filter((a) => a.Required).map((a) => a.Name), ['sub']);
+    assert.equal(pool.UsernameConfiguration.CaseSensitive, false);
+    assert.equal(pool.AdminCreateUserConfig.AllowAdminCreateUserOnly, true);
+    assert.equal(pool.Policies.PasswordPolicy.MinimumLength, 8);
+    const { UserPoolClient: client } = await cognito.send(
+      new DescribeUserPoolClientCommand({ UserPoolId: out.UserPoolId, ClientId: out.UserPoolClientId }),
+    );
+    assert.deepEqual(client.WriteAttributes, ['updated_at']);
+  });
+
+  test('students only have a username and a sub', async () => {
+    const user = await cognito.send(new AdminGetUserCommand({ UserPoolId: out.UserPoolId, Username: studentA.username }));
+    assert.deepEqual(user.UserAttributes.map((a) => a.Name), ['sub']);
+  });
+
+  test('students cannot add an e-mail or name to their own profile', async () => {
+    for (const Name of ['name', 'email', 'given_name', 'phone_number']) {
+      await assert.rejects(
+        cognito.send(new UpdateUserAttributesCommand({ AccessToken: tokenA, UserAttributes: [{ Name, Value: 'x' }] })),
+        { name: 'NotAuthorizedException' },
+        Name,
+      );
+    }
+  });
+
+  test('usernames are case-insensitive at sign-in', async () => {
+    const token = await login({ username: studentA.username.toUpperCase(), password: studentA.password });
+    assert.equal(decode(token).sub, studentA.sub);
+  });
+
+  test('only simple usernames are accepted by the scripts', () => {
+    assert.equal(normalizeUsername('  Student.A_1-x '), 'student.a_1-x');
+    for (const bad of ['ab', 'a'.repeat(33), 'user@example.com', 'two words', 'ümlaut', '']) {
+      assert.throws(() => normalizeUsername(bad), /username/);
+    }
   });
 });
 

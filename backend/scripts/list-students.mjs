@@ -8,6 +8,6 @@ run(async () => {
   if (!students.length) return console.log('No students yet.');
   for (const s of students) {
     const videos = await listVideoObjects({ stack: values.stack, sub: s.sub });
-    console.log(`${s.email}\t${s.name}\t${s.sub}\t${videos.length} video(s)`);
+    console.log(`${s.username}\t${s.sub}\t${videos.length} video(s)`);
   }
 }, 'Usage: node scripts/list-students.mjs [--stack <name>]');

@@ -1,25 +1,26 @@
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
-import { DEFAULT_STACK, deleteStudent, normalizeEmail, run, usageError } from './lib.mjs';
+import { DEFAULT_STACK, deleteStudent, normalizeUsername, run, usageError } from './lib.mjs';
 
-const usage = `Usage: node scripts/delete-student.mjs --email <email> [--delete-videos] [--stack <name>]
+const usage = `Usage: node scripts/delete-student.mjs --username <username> [--delete-videos] [--stack <name>]
   Deletes the student's login. Their videos stay in S3 unless --delete-videos is passed.`;
 
 run(async () => {
   const { values } = parseArgs({
     options: {
-      email: { type: 'string' },
+      username: { type: 'string' },
       'delete-videos': { type: 'boolean', default: false },
       stack: { type: 'string', default: DEFAULT_STACK },
     },
   });
-  if (!values.email) throw usageError();
+  if (!values.username) throw usageError();
+  const username = normalizeUsername(values.username);
   const { sub, deleted } = await deleteStudent({
     stack: values.stack,
-    email: values.email,
+    username,
     deleteVideos: values['delete-videos'],
   });
-  console.log(`Deleted student ${normalizeEmail(values.email)} (sub ${sub}).`);
+  console.log(`Deleted student ${username} (sub ${sub}).`);
   console.log(
     values['delete-videos']
       ? `Deleted ${deleted} file(s) under students/${sub}/.`

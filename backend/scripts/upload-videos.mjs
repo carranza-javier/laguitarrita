@@ -8,7 +8,7 @@ import { HeadObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { DEFAULT_STACK, findTool, getStudent, run, s3, stackOutputs, usageError, videosPrefix } from './lib.mjs';
 
-const usage = `Usage: node scripts/upload-videos.mjs --email <student email> <file-or-folder> [...] [--overwrite] [--stack <name>]
+const usage = `Usage: node scripts/upload-videos.mjs --username <username> <file-or-folder> [...] [--overwrite] [--stack <name>]
   Uploads videos to the student's private folder. Folders are expanded to the video files they contain.
   With ffmpeg installed, videos larger than 480p are re-encoded to 480p H.264 with +faststart first;
   videos that are already 480p or smaller are uploaded unchanged. Existing files are skipped unless --overwrite.`;
@@ -74,19 +74,19 @@ run(async () => {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
-      email: { type: 'string' },
+      username: { type: 'string' },
       overwrite: { type: 'boolean', default: false },
       stack: { type: 'string', default: DEFAULT_STACK },
     },
   });
-  if (!values.email || !positionals.length) throw usageError();
+  if (!values.username || !positionals.length) throw usageError();
 
   const files = expandInputs(positionals);
   if (!files.length) throw new Error('No video files found.');
 
   const { BucketName } = await stackOutputs(values.stack);
-  const { sub, name } = await getStudent({ stack: values.stack, email: values.email });
-  console.log(`Student: ${name ?? values.email} (sub ${sub})`);
+  const { sub, username } = await getStudent({ stack: values.stack, username: values.username });
+  console.log(`Student: ${username} (sub ${sub})`);
 
   const ffmpeg = findTool('ffmpeg');
   const ffprobe = findTool('ffprobe');

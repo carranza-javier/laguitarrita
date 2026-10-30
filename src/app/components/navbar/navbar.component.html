@@ -19,11 +19,11 @@
 
   <!-- Student area -->
   <a mat-button class="student-link" routerLink="/schueler" rel="nofollow">
-    <mat-icon aria-hidden="true">lock</mat-icon>{{ ts.t().nav.studentArea }}
+    <mat-icon aria-hidden="true">account_circle</mat-icon>{{ ts.t().nav.studentArea }}
   </a>
   <a mat-icon-button class="student-icon" routerLink="/schueler" rel="nofollow"
      [attr.aria-label]="ts.t().nav.studentArea">
-    <mat-icon>lock</mat-icon>
+    <mat-icon>account_circle</mat-icon>
   </a>
 
   <!-- Mobile hamburger -->
@@ -39,7 +39,7 @@
   <button mat-menu-item (click)="scrollTo('prices')">{{ ts.t().nav.prices }}</button>
   <button mat-menu-item (click)="scrollTo('contact')">{{ ts.t().nav.contact }}</button>
   <a mat-menu-item routerLink="/schueler" rel="nofollow" class="student-item">
-    <mat-icon>lock</mat-icon>{{ ts.t().nav.studentArea }}
+    <mat-icon>account_circle</mat-icon>{{ ts.t().nav.studentArea }}
   </a>
   <button mat-menu-item (click)="ts.toggle()">
     {{ ts.lang() === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln' }}

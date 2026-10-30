@@ -74,9 +74,10 @@ They live in `LAUNCH_OLD_PRICES` in `prices.component.ts` — set it to `null` t
 - Keep it simple — just reach out directly
 
 ## Student area (`/schueler`)
-Students sign in with e-mail and password and can watch and download only their own class videos.
-There is no public sign-up, no password recovery and no e-mail: the teacher manages everything with
-the scripts below.
+Students sign in with a username (a pseudonym chosen by the teacher) and a password, and can watch
+and download only their own class videos. No e-mail addresses or real names are stored anywhere.
+There is no public sign-up, no password recovery and Cognito never sends a message: the teacher
+manages everything with the scripts below.
 
 - Region `eu-central-1`, stack `laguitarrita-students` (template: `backend/template.yaml`)
 - Videos: `s3://laguitarrita-students-videos-964907375727/students/{cognito-sub}/videos/{file}`.
@@ -90,26 +91,27 @@ Requirements: Node.js 22+, AWS CLI credentials for the account, and optionally f
 (`winget install Gyan.FFmpeg`). Run once: `cd backend && npm install`.
 
 All scripts accept `--stack <name>` (default `laguitarrita-students`). If `--password` is omitted the
-script asks for it without showing it (and it does not end up in the shell history).
+script asks for it without showing it (and it does not end up in the shell history). Usernames are
+3-32 characters (letters, digits, `.`, `-`, `_`) and case-insensitive; passwords need 8+ characters.
 
 ```bash
 cd backend
 
-# Create a student (permanent password, no e-mail is sent). Prints the student's sub.
-node scripts/create-student.mjs --email mike@example.com --name "Mike Weber" --password "..."
+# Create a student (permanent password, no message is sent). Prints the student's sub.
+node scripts/create-student.mjs --username USERNAME --password "PASSWORD"
 
 # Upload videos (files and/or folders). With ffmpeg, videos above 480p are re-encoded to 480p
 # with +faststart; 480p or smaller are uploaded unchanged. Existing files are skipped unless --overwrite.
-node scripts/upload-videos.mjs --email mike@example.com "C:/Videos/Mike/clase-01.mp4" "C:/Videos/Mike/"
+node scripts/upload-videos.mjs --username USERNAME "C:/Videos/clase-01.mp4" "C:/Videos/USERNAME/"
 
 # Set a new password (also signs the student out everywhere)
-node scripts/reset-password.mjs --email mike@example.com --password "..."
+node scripts/reset-password.mjs --username USERNAME --password "NEW_PASSWORD"
 
-# List students with their sub and number of videos
+# List students (username, sub and number of videos)
 node scripts/list-students.mjs
 
 # Delete a student's login; add --delete-videos to also delete their folder
-node scripts/delete-student.mjs --email mike@example.com [--delete-videos]
+node scripts/delete-student.mjs --username USERNAME [--delete-videos]
 ```
 
 Deleting a single video: `aws s3 rm "s3://laguitarrita-students-videos-964907375727/students/<sub>/videos/<file>"`.
@@ -126,7 +128,8 @@ sam build && sam deploy --config-env test    # throwaway test stack laguitarrita
 ### Tests
 `npm run test:integration` (in `backend/`, needs ffmpeg) creates two temporary students on the stack
 named by `STUDENTS_STACK` (default `laguitarrita-students-test`), checks that requests without a valid
-token get 401 and that student B can never see or download student A's videos, then deletes them.
+token get 401, that student B can never see or download student A's videos and that the user pool
+stores nothing but a username and a sub, then deletes them.
 
 To remove the test stack: empty and delete its bucket (it is retained) after
 `aws cloudformation delete-stack --stack-name laguitarrita-students-test`.

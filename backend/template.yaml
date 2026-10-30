@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   laguitarrita.ch private student area: Cognito user pool (admin-created users only),
   private S3 bucket with per-student class videos and an HTTP API that returns
-  short-lived presigned URLs for the caller's own videos.
+  short-lived presigned URLs for the caller's own videos, plus the students' own notes per video.
 
 Parameters:
   Environment:
@@ -128,14 +128,34 @@ Resources:
               Bool:
                 aws:SecureTransport: 'false'
 
+  # Students' own notes per video (partition key = Cognito sub, sort key = video file name).
+  NotesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${AWS::StackName}-notes
+      BillingMode: PAY_PER_REQUEST
+      DeletionProtectionEnabled: !If [IsProd, true, false]
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: sub
+          AttributeType: S
+        - AttributeName: video
+          AttributeType: S
+      KeySchema:
+        - AttributeName: sub
+          KeyType: HASH
+        - AttributeName: video
+          KeyType: RANGE
+
   # ---------------------------------------------------------------- API
   VideosApi:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
         AllowOrigins: !Ref AllowedOrigins
-        AllowHeaders: [authorization]
-        AllowMethods: [GET]
+        AllowHeaders: [authorization, content-type]
+        AllowMethods: [GET, PUT]
         MaxAge: 3600
       DefaultRouteSettings:
         ThrottlingBurstLimit: 20
@@ -161,6 +181,7 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: !Ref VideosBucket
+          NOTES_TABLE: !Ref NotesTable
       Policies:
         - Statement:
             - Effect: Allow
@@ -172,6 +193,9 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource: !Sub ${VideosBucket.Arn}/students/*
+            - Effect: Allow
+              Action: dynamodb:Query
+              Resource: !GetAtt NotesTable.Arn
       Events:
         ListVideos:
           Type: HttpApi
@@ -180,10 +204,52 @@ Resources:
             Path: /videos
             Method: GET
 
+  SaveNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-save-note
+      CodeUri: src/save-note/
+      Handler: index.handler
+      LoggingConfig:
+        LogGroup: !Ref SaveNoteLogGroup
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref VideosBucket
+          NOTES_TABLE: !Ref NotesTable
+      Policies:
+        - Statement:
+            # HeadObject (checks the video exists in the caller's folder) needs s3:GetObject, and
+            # s3:ListBucket so that a missing video is a 404 instead of a 403.
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource: !Sub ${VideosBucket.Arn}/students/*
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !GetAtt VideosBucket.Arn
+              Condition:
+                StringLike:
+                  s3:prefix: students/*
+            - Effect: Allow
+              Action: [dynamodb:PutItem, dynamodb:DeleteItem]
+              Resource: !GetAtt NotesTable.Arn
+      Events:
+        SaveNote:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref VideosApi
+            Path: /notes
+            Method: PUT
+
   ListVideosLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-list-videos
+      RetentionInDays: 30
+
+  SaveNoteLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-save-note
       RetentionInDays: 30
 
 Outputs:
@@ -195,5 +261,7 @@ Outputs:
     Value: !Ref StudentsUserPoolClient
   BucketName:
     Value: !Ref VideosBucket
+  NotesTableName:
+    Value: !Ref NotesTable
   ApiUrl:
     Value: !Sub https://${VideosApi}.execute-api.${AWS::Region}.amazonaws.com

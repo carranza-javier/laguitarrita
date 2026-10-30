@@ -1,8 +1,11 @@
-import { GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
+import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3 = new S3Client({});
+const dynamo = new DynamoDBClient({});
 const BUCKET = process.env.BUCKET_NAME;
+const NOTES_TABLE = process.env.NOTES_TABLE;
 
 // Presigned URLs are only a per-visit key: the objects themselves never expire.
 export const URL_TTL_SECONDS = 3600;
@@ -41,11 +44,13 @@ export const handler = async (event) => {
   } while (continuationToken);
 
   const files = objects.filter((o) => o.Size > 0 && !o.Key.slice(prefix.length).includes('/'));
+  const notes = await loadNotes(sub);
 
   const videos = await Promise.all(
     files.map(async (o) => {
       const name = o.Key.slice(prefix.length);
-      const [playUrl, downloadUrl] = await Promise.all([
+      const [date, playUrl, downloadUrl] = await Promise.all([
+        recordedAt(o),
         getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: o.Key }), {
           expiresIn: URL_TTL_SECONDS,
         }),
@@ -59,10 +64,37 @@ export const handler = async (event) => {
           { expiresIn: URL_TTL_SECONDS },
         ),
       ]);
-      return { name, lastModified: o.LastModified.toISOString(), size: o.Size, playUrl, downloadUrl };
+      return { name, date, size: o.Size, playUrl, downloadUrl, note: notes.get(name) ?? '' };
     }),
   );
 
-  videos.sort((a, b) => b.lastModified.localeCompare(a.lastModified));
+  videos.sort((a, b) => b.date.localeCompare(a.date));
   return json(200, { videos, expiresIn: URL_TTL_SECONDS });
 };
+
+/** Recording date stored by the upload script (from the video's own metadata), else the upload date. */
+async function recordedAt(object) {
+  const head = await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: object.Key }));
+  const recorded = Date.parse(head.Metadata?.recorded ?? '');
+  return new Date(Number.isNaN(recorded) ? object.LastModified : recorded).toISOString();
+}
+
+/** The student's notes, keyed by video file name. */
+async function loadNotes(sub) {
+  const notes = new Map();
+  let ExclusiveStartKey;
+  do {
+    const page = await dynamo.send(
+      new QueryCommand({
+        TableName: NOTES_TABLE,
+        KeyConditionExpression: '#sub = :sub',
+        ExpressionAttributeNames: { '#sub': 'sub' },
+        ExpressionAttributeValues: { ':sub': { S: sub } },
+        ExclusiveStartKey,
+      }),
+    );
+    for (const item of page.Items ?? []) notes.set(item.video.S, item.text?.S ?? '');
+    ExclusiveStartKey = page.LastEvaluatedKey;
+  } while (ExclusiveStartKey);
+  return notes;
+}

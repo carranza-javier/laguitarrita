@@ -4,10 +4,13 @@ import { STUDENT_CONFIG } from './student-config';
 
 export interface VideoDto {
   name: string;
-  lastModified: string;
+  /** Recording date (from the video's metadata) or, if unknown, the upload date. */
+  date: string;
   size: number;
   playUrl: string;
   downloadUrl: string;
+  /** The student's own note for this video ('' if none). */
+  note: string;
 }
 
 export interface VideoList {
@@ -17,6 +20,8 @@ export interface VideoList {
 }
 
 export class VideosLoadError extends Error {}
+
+export const MAX_NOTE_LENGTH = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class StudentVideosService {
@@ -37,5 +42,22 @@ export class StudentVideosService {
     if (res.status === 401) throw new StudentAuthError('sessionExpired');
     if (!res.ok) throw new VideosLoadError(`HTTP ${res.status}`);
     return res.json();
+  }
+
+  /** Saves the student's note for one of their videos; an empty text deletes it. */
+  async saveNote(video: string, text: string): Promise<void> {
+    const token = await this.auth.accessToken();
+    let res: Response;
+    try {
+      res = await fetch(`${STUDENT_CONFIG.apiUrl}/notes`, {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ video, text }),
+      });
+    } catch {
+      throw new StudentAuthError('network');
+    }
+    if (res.status === 401) throw new StudentAuthError('sessionExpired');
+    if (!res.ok) throw new VideosLoadError(`HTTP ${res.status}`);
   }
 }

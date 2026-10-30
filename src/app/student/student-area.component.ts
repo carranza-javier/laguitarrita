@@ -8,7 +8,7 @@ import {
   effect,
   inject,
   signal,
-  viewChildren,
+  viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TranslationService } from '../services/translation.service';
 import { AuthErrorCode, StudentAuthError, StudentAuthService, StudentSession } from './student-auth.service';
-import { StudentVideosService, VideoDto } from './student-videos.service';
+import { MAX_NOTE_LENGTH, StudentVideosService, VideoDto } from './student-videos.service';
 
 type View = 'checking' | 'login' | 'videos';
 type ErrorKey = AuthErrorCode | 'missing' | 'videos';
@@ -28,6 +28,13 @@ interface VideoItem {
   size: number;
   playUrl: WritableSignal<string>;
   downloadUrl: WritableSignal<string>;
+  note: WritableSignal<string>;
+}
+
+interface MonthGroup {
+  key: string;
+  label: string;
+  items: VideoItem[];
 }
 
 const HOME_TITLE = 'Gitarrenunterricht in Bern – Flamenco & spanische Gitarre';
@@ -60,7 +67,31 @@ export class StudentAreaComponent {
   protected username = '';
   protected password = '';
 
-  private readonly players = viewChildren<ElementRef<HTMLVideoElement>>('player');
+  // Library: search and month groups (newest first, only the newest month open by default).
+  protected readonly query = signal('');
+  private readonly openMonths = signal(new Set<string>());
+  private readonly filtered = computed(() => {
+    const q = normalize(this.query().trim());
+    const all = this.videos() ?? [];
+    return q ? all.filter((v) => normalize(v.title).includes(q)) : all;
+  });
+  protected readonly groups = computed(() => groupByMonth(this.filtered(), this.locale()));
+
+  // Player dialog.
+  protected readonly speeds = [0.5, 0.6, 0.75, 0.9, 1];
+  protected readonly speed = signal(1);
+  protected readonly playing = signal<VideoItem | null>(null);
+  private readonly playerDialog = viewChild<ElementRef<HTMLDialogElement>>('playerDialog');
+  private readonly player = viewChild<ElementRef<HTMLVideoElement>>('player');
+
+  // Notes dialog.
+  protected readonly maxNoteLength = MAX_NOTE_LENGTH;
+  protected readonly editing = signal<VideoItem | null>(null);
+  protected readonly noteSaving = signal(false);
+  protected readonly noteError = signal(false);
+  protected noteDraft = '';
+  private readonly noteDialog = viewChild<ElementRef<HTMLDialogElement>>('noteDialog');
+
   private urlsValidUntil = 0;
   private lastRefresh = 0;
   private refreshing?: Promise<void>;
@@ -99,9 +130,12 @@ export class StudentAreaComponent {
   }
 
   protected async logout(): Promise<void> {
+    this.playerDialog()?.nativeElement.close();
+    this.noteDialog()?.nativeElement.close();
     await this.auth.logout();
     this.session.set(null);
     this.videos.set(null);
+    this.query.set('');
     this.error.set(null);
     this.view.set('login');
   }
@@ -111,13 +145,70 @@ export class StudentAreaComponent {
     this.videos.set(null);
     try {
       const { videos } = await this.fetchList();
-      this.videos.set(videos.map(toItem));
+      const items = videos.map(toItem);
+      this.videos.set(items);
+      this.openMonths.set(new Set(items.length ? [monthKey(items[0].date)] : []));
     } catch (err) {
       this.handleError(err);
     }
   }
 
-  /** The presigned URL may have expired (e.g. the tab stayed open): get new ones and resume. */
+  protected isOpen(group: MonthGroup): boolean {
+    // While searching, every month with results is shown open.
+    return !!this.query().trim() || this.openMonths().has(group.key);
+  }
+
+  protected toggleMonth(group: MonthGroup): void {
+    const open = new Set(this.openMonths());
+    if (open.has(group.key)) open.delete(group.key);
+    else open.add(group.key);
+    this.openMonths.set(open);
+  }
+
+  // ---------------------------------------------------------------- player
+
+  protected async play(item: VideoItem): Promise<void> {
+    if (this.urlsStale()) {
+      try {
+        await this.refreshUrls();
+      } catch {
+        return;
+      }
+    }
+    // Reopened before the previous player was removed from the page: start it over.
+    const previous = this.player()?.nativeElement;
+    if (previous && this.playing() === item) {
+      previous.currentTime = 0;
+      previous.play().catch(() => {});
+    }
+    this.playing.set(item);
+    this.playerDialog()?.nativeElement.showModal();
+  }
+
+  protected closePlayer(): void {
+    this.playerDialog()?.nativeElement.close();
+  }
+
+  /** Called on every close (button, Esc or backdrop): removing the video element stops the download. */
+  protected onPlayerClosed(): void {
+    // The close event is asynchronous: ignore it if another video was opened in the meantime.
+    if (this.playerDialog()?.nativeElement.open) return;
+    this.player()?.nativeElement.pause();
+    this.playing.set(null);
+  }
+
+  protected setSpeed(speed: number): void {
+    this.speed.set(speed);
+    const player = this.player()?.nativeElement;
+    if (player) player.playbackRate = speed;
+  }
+
+  /** A new src resets the playback rate, so the chosen speed is applied again. */
+  protected onPlayerLoaded(player: HTMLVideoElement): void {
+    player.playbackRate = this.speed();
+  }
+
+  /** The presigned URL may have expired (e.g. the dialog stayed open): get a new one and resume. */
   protected async onPlayerError(item: VideoItem, player: HTMLVideoElement): Promise<void> {
     if (Date.now() - this.lastRefresh < MIN_RETRY_INTERVAL_MS) return;
     const resumeAt = player.currentTime;
@@ -140,17 +231,70 @@ export class StudentAreaComponent {
     } catch {}
   }
 
+  // ---------------------------------------------------------------- notes
+
+  protected openNote(item: VideoItem): void {
+    this.editing.set(item);
+    this.noteDraft = item.note();
+    this.noteError.set(false);
+    this.noteDialog()?.nativeElement.showModal();
+  }
+
+  protected closeNote(): void {
+    this.noteDialog()?.nativeElement.close();
+  }
+
+  protected async saveNote(): Promise<void> {
+    const item = this.editing();
+    if (!item || this.noteSaving()) return;
+    const text = this.noteDraft.trim() ? this.noteDraft : '';
+    this.noteSaving.set(true);
+    this.noteError.set(false);
+    try {
+      await this.videosApi.saveNote(item.name, text);
+      item.note.set(text);
+      this.closeNote();
+    } catch (err) {
+      if (err instanceof StudentAuthError && err.code === 'sessionExpired') {
+        this.closeNote();
+        this.handleError(err);
+      } else {
+        this.noteError.set(true);
+      }
+    } finally {
+      this.noteSaving.set(false);
+    }
+  }
+
+  /** Closes a dialog when its backdrop (the dialog element itself, outside the panel) is clicked. */
+  protected closeOnBackdrop(event: MouseEvent, dialog: HTMLDialogElement): void {
+    if (event.target === dialog) dialog.close();
+  }
+
+  // ---------------------------------------------------------------- formatting
+
+  /** Short date for a row: the month group already shows month and year. */
   protected formatDate(date: Date): string {
-    return date.toLocaleDateString(this.ts.lang() === 'de' ? 'de-CH' : 'en-GB', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    return date.toLocaleDateString(this.locale(), { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
   protected formatSize(bytes: number): string {
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   }
+
+  protected formatSpeed(speed: number): string {
+    return `${speed.toLocaleString(this.locale())}×`;
+  }
+
+  protected countLabel(count: number): string {
+    return `${count} ${count === 1 ? this.t().videoCountOne : this.t().videoCount}`;
+  }
+
+  private locale(): string {
+    return this.ts.lang() === 'de' ? 'de-CH' : 'en-GB';
+  }
+
+  // ---------------------------------------------------------------- data
 
   private async restoreSession(): Promise<void> {
     const session = await this.auth.currentSession();
@@ -171,8 +315,8 @@ export class StudentAreaComponent {
   }
 
   /**
-   * Swaps in new presigned URLs without interrupting playback: players that are playing keep
-   * their current URL (they get a new one through onPlayerError if it stops working).
+   * Swaps in new presigned URLs without interrupting playback: the video that is playing keeps
+   * its current URL (it gets a new one through onPlayerError if it stops working).
    * `force` names a video whose player must get the new URL regardless.
    */
   private refreshUrls(force?: string): Promise<void> {
@@ -180,17 +324,13 @@ export class StudentAreaComponent {
       try {
         const { videos } = await this.fetchList();
         const fresh = new Map(videos.map((v) => [v.name, v]));
-        const busy = new Set(
-          this.players()
-            .map((p) => p.nativeElement)
-            .filter((el) => !el.paused && !el.error)
-            .map((el) => el.dataset['name']),
-        );
+        const player = this.player()?.nativeElement;
+        const busy = player && !player.paused && !player.error ? this.playing()?.name : undefined;
         for (const item of this.videos() ?? []) {
           const dto = fresh.get(item.name);
           if (!dto) continue;
           item.downloadUrl.set(dto.downloadUrl);
-          if (item.name === force || !busy.has(item.name)) item.playUrl.set(dto.playUrl);
+          if (item.name === force || item.name !== busy) item.playUrl.set(dto.playUrl);
         }
       } catch (err) {
         this.handleError(err);
@@ -204,6 +344,7 @@ export class StudentAreaComponent {
 
   private handleError(err: unknown): void {
     if (err instanceof StudentAuthError && err.code === 'sessionExpired') {
+      this.playerDialog()?.nativeElement.close();
       this.session.set(null);
       this.videos.set(null);
       this.view.set('login');
@@ -239,10 +380,33 @@ export class StudentAreaComponent {
 function toItem(v: VideoDto): VideoItem {
   return {
     name: v.name,
-    title: v.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim(),
-    date: new Date(v.lastModified),
+    // The title is the file name exactly as uploaded, without the extension.
+    title: v.name.replace(/\.[^.]+$/, ''),
+    date: new Date(v.date),
     size: v.size,
     playUrl: signal(v.playUrl),
     downloadUrl: signal(v.downloadUrl),
+    note: signal(v.note ?? ''),
   };
+}
+
+const monthKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+/** Case- and accent-insensitive form for searching ("Bulerias" finds "Bulerías"). */
+const normalize = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+/** Groups videos (already sorted newest first) by calendar month. */
+function groupByMonth(items: VideoItem[], locale: string): MonthGroup[] {
+  const groups = new Map<string, MonthGroup>();
+  for (const item of items) {
+    const key = monthKey(item.date);
+    let group = groups.get(key);
+    if (!group) {
+      const label = item.date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+      group = { key, label, items: [] };
+      groups.set(key, group);
+    }
+    group.items.push(item);
+  }
+  return [...groups.values()];
 }

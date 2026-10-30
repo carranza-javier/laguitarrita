@@ -49,11 +49,22 @@
     }
 
     @case ('videos') {
-      <section class="videos">
-        <h1>{{ t().videosHeading }}</h1>
-        @if (session()?.username) {
-          <p class="muted">{{ t().hello }} {{ session()?.username }}</p>
-        }
+      <div class="videos">
+        <div class="lib-head">
+          <div>
+            <h1>{{ t().videosHeading }}</h1>
+            @if (session()?.username) {
+              <p class="muted">{{ t().hello }} {{ session()?.username }}</p>
+            }
+          </div>
+          @if (videos()?.length) {
+            <label class="search">
+              <span class="material-icons" aria-hidden="true">search</span>
+              <input type="search" [placeholder]="t().search" [attr.aria-label]="t().search" autocomplete="off"
+                     spellcheck="false" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+            </label>
+          }
+        </div>
 
         @if (error(); as e) {
           <p class="error" role="alert">
@@ -64,29 +75,118 @@
           <p class="muted" aria-live="polite">{{ t().loading }}</p>
         } @else if (!videos()!.length) {
           <p class="muted">{{ t().empty }}</p>
+        } @else if (!groups().length) {
+          <p class="muted" aria-live="polite">{{ t().noResults }} „{{ query().trim() }}“</p>
         }
 
-        <ul class="list">
-          @for (item of videos() ?? []; track item.name) {
-            <li class="item">
-              <video #player controls playsinline preload="metadata" [attr.data-name]="item.name"
-                     [src]="item.playUrl()" (error)="onPlayerError(item, player)"></video>
-              <div class="info">
-                <div>
-                  <h2>{{ item.title }}</h2>
-                  <p class="muted small">{{ formatDate(item.date) }} · {{ formatSize(item.size) }}</p>
-                </div>
-                <a class="download" [href]="item.downloadUrl()" (click)="download($event, item)">
-                  <span class="material-icons" aria-hidden="true">download</span>{{ t().download }}
-                </a>
-              </div>
-            </li>
-          }
-        </ul>
-      </section>
+        @for (group of groups(); track group.key) {
+          <div class="month">
+            <button type="button" class="month-head" (click)="toggleMonth(group)"
+                    [attr.aria-expanded]="isOpen(group)" [disabled]="!!query().trim()">
+              <span class="material-icons chevron" [class.open]="isOpen(group)" aria-hidden="true">chevron_right</span>
+              <span class="month-label">{{ group.label }}</span>
+              <span class="muted count">{{ countLabel(group.items.length) }}</span>
+            </button>
+
+            @if (isOpen(group)) {
+              <ul class="rows">
+                @for (item of group.items; track item.name) {
+                  <li class="row">
+                    <button type="button" class="row-main" (click)="play(item)">
+                      <span class="row-title">{{ item.title }}</span>
+                      <span class="muted small">{{ formatDate(item.date) }} · {{ formatSize(item.size) }}</span>
+                      @if (item.note()) {
+                        <span class="note-preview">{{ item.note() }}</span>
+                      }
+                    </button>
+                    <div class="actions">
+                      <button type="button" class="icon-btn play" (click)="play(item)"
+                              [attr.aria-label]="t().play + ': ' + item.title" [title]="t().play">
+                        <span class="material-icons" aria-hidden="true">play_arrow</span>
+                      </button>
+                      <a class="icon-btn" [href]="item.downloadUrl()" (click)="download($event, item)"
+                         [attr.aria-label]="t().download + ': ' + item.title" [title]="t().download">
+                        <span class="material-icons" aria-hidden="true">download</span>
+                      </a>
+                      <button type="button" class="icon-btn" [class.has-note]="item.note()" (click)="openNote(item)"
+                              [attr.aria-label]="(item.note() ? t().editNote : t().addNote) + ': ' + item.title"
+                              [title]="item.note() ? t().editNote : t().addNote">
+                        <span class="material-icons" aria-hidden="true">edit_note</span>
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </div>
     }
   }
 </main>
+
+<dialog #playerDialog class="dialog player-dialog" (close)="onPlayerClosed()"
+        (click)="closeOnBackdrop($event, playerDialog)" [attr.aria-label]="playing()?.title">
+  @if (playing(); as item) {
+    <div class="panel">
+      <header class="dialog-head">
+        <h2>{{ item.title }}</h2>
+        <button type="button" class="icon-btn" (click)="closePlayer()" [attr.aria-label]="t().close">
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <video #player controls autoplay playsinline [src]="item.playUrl()"
+             (loadedmetadata)="onPlayerLoaded(player)" (error)="onPlayerError(item, player)"></video>
+      <div class="dialog-foot">
+        <div class="speeds" role="group" [attr.aria-label]="t().speed">
+          <span class="muted small">{{ t().speed }}</span>
+          @for (s of speeds; track s) {
+            <button type="button" class="chip" [class.active]="speed() === s" [attr.aria-pressed]="speed() === s"
+                    (click)="setSpeed(s)">{{ formatSpeed(s) }}</button>
+          }
+        </div>
+        <div class="foot-actions">
+          <a class="link-btn accent" [href]="item.downloadUrl()" (click)="download($event, item)">
+            <span class="material-icons" aria-hidden="true">download</span>{{ t().download }}
+          </a>
+          <button type="button" class="link-btn accent" (click)="openNote(item)">
+            <span class="material-icons" aria-hidden="true">edit_note</span>{{ item.note() ? t().editNote : t().addNote }}
+          </button>
+        </div>
+      </div>
+      @if (item.note()) {
+        <p class="note-full">{{ item.note() }}</p>
+      }
+    </div>
+  }
+</dialog>
+
+<dialog #noteDialog class="dialog note-dialog" (click)="closeOnBackdrop($event, noteDialog)"
+        [attr.aria-label]="t().notes">
+  <form class="panel" (ngSubmit)="saveNote()">
+    <header class="dialog-head">
+      <div>
+        <h2>{{ t().notes }}</h2>
+        <p class="muted small">{{ editing()?.title }}</p>
+      </div>
+      <button type="button" class="icon-btn" (click)="closeNote()" [attr.aria-label]="t().close">
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+    </header>
+    <textarea name="note" rows="8" autofocus [maxlength]="maxNoteLength" [placeholder]="t().notePlaceholder"
+              [(ngModel)]="noteDraft" [disabled]="noteSaving()" [attr.aria-label]="t().notes"></textarea>
+    <p class="muted small counter">{{ noteDraft.length }} / {{ maxNoteLength }}</p>
+    @if (noteError()) {
+      <p class="error" role="alert">{{ t().noteError }}</p>
+    }
+    <div class="dialog-buttons">
+      <button type="button" class="link-btn" (click)="closeNote()">{{ t().cancel }}</button>
+      <button type="submit" class="primary" [disabled]="noteSaving()">
+        {{ noteSaving() ? t().saving : t().save }}
+      </button>
+    </div>
+  </form>
+</dialog>
 
 <footer class="foot">
   <a routerLink="/">{{ t().home }}</a>

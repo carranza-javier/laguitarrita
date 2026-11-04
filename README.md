@@ -114,6 +114,12 @@ node scripts/create-student.mjs --username USERNAME --password "PASSWORD"
 # kept. Existing files are skipped unless --overwrite.
 node scripts/upload-videos.mjs --username USERNAME "C:/Videos/clase-01.mp4" "C:/Videos/USERNAME/"
 
+# Set the order the student sees (first argument on top). The app sorts by date (newest first), so this
+# just rewrites each named file's recording date; the files are not re-uploaded. Run it after uploading.
+# Files are dated today by default; --date YYYY-MM-DD puts them on another day/month. Pass names exactly
+# as uploaded (with extension); files you do not name are left untouched.
+node scripts/order-videos.mjs --username USERNAME "Técnica - Arpegio.mp4" "Soleá - Falseta (Parte 2).mp4" ...
+
 # Set a new password (also signs the student out everywhere)
 node scripts/reset-password.mjs --username USERNAME --password "NEW_PASSWORD"
 

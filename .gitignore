@@ -48,3 +48,7 @@ Thumbs.db
 
 # Asset source archives
 public/*.zip
+
+# Student media staging: videos/audio/PDFs are uploaded to S3 with backend/scripts/upload-videos.mjs,
+# never committed. Each student's files live in a subfolder here (e.g. src/assets/mike.weber/).
+/src/assets/*/

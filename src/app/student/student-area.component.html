@@ -134,7 +134,8 @@
 </main>
 
 <dialog #playerDialog class="dialog player-dialog" (close)="onPlayerClosed()"
-        (click)="closeOnBackdrop($event, playerDialog)" [attr.aria-label]="playing()?.title">
+        (click)="closeOnBackdrop($event, playerDialog)" (keydown)="onPlayerKeydown($event)"
+        [attr.aria-label]="playing()?.title">
   @if (playing(); as item) {
     <div class="panel">
       <header class="dialog-head">

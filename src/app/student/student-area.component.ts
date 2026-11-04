@@ -218,6 +218,20 @@ export class StudentAreaComponent {
     this.playerDialog()?.nativeElement.close();
   }
 
+  /**
+   * Space toggles play/pause, as in any video player. The dialog opens with focus on a button, so
+   * Space would otherwise activate that control; we override it everywhere except on the media
+   * element itself, which already toggles on Space (handling it here too would cancel out).
+   */
+  protected onPlayerKeydown(event: KeyboardEvent): void {
+    if (event.code !== 'Space' && event.key !== ' ') return;
+    const player = this.player()?.nativeElement;
+    if (!player || event.target === player) return;
+    event.preventDefault();
+    if (player.paused) player.play().catch(() => {});
+    else player.pause();
+  }
+
   /** Called on every close (button, Esc or backdrop): removing the video element stops the download. */
   protected onPlayerClosed(): void {
     // The close event is asynchronous: ignore it if another video was opened in the meantime.

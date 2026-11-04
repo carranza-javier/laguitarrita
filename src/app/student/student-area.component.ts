@@ -82,6 +82,10 @@ export class StudentAreaComponent {
   protected readonly speeds = [0.5, 0.6, 0.75, 0.9, 1];
   protected readonly speed = signal(1);
   protected readonly playing = signal<VideoItem | null>(null);
+  // Looping: repeat the whole file, or an A–B section (both set, B after A).
+  protected readonly loopAll = signal(false);
+  protected readonly loopA = signal<number | null>(null);
+  protected readonly loopB = signal<number | null>(null);
   private readonly playerDialog = viewChild<ElementRef<HTMLDialogElement>>('playerDialog');
   private readonly player = viewChild<ElementRef<HTMLMediaElement>>('player');
 
@@ -204,6 +208,9 @@ export class StudentAreaComponent {
         return;
       }
     }
+    // Loop settings belong to one file: start every opened video without a loop.
+    this.clearLoop();
+    this.loopAll.set(false);
     // Reopened before the previous player was removed from the page: start it over.
     const previous = this.player()?.nativeElement;
     if (previous && this.playing() === item) {
@@ -246,9 +253,54 @@ export class StudentAreaComponent {
     if (player) player.playbackRate = speed;
   }
 
-  /** A new src resets the playback rate, so the chosen speed is applied again. */
+  /** A new src resets the playback rate and loop flag, so the chosen ones are applied again. */
   protected onPlayerLoaded(player: HTMLMediaElement): void {
     player.playbackRate = this.speed();
+    player.loop = this.loopAll();
+  }
+
+  /** Repeat the whole file when it ends (independent of the A–B section loop). */
+  protected toggleLoopAll(): void {
+    const on = !this.loopAll();
+    this.loopAll.set(on);
+    const player = this.player()?.nativeElement;
+    if (player) player.loop = on;
+  }
+
+  /** Mark the current position as the A (start) or B (end) point of the section loop. */
+  protected markA(): void {
+    const t = this.player()?.nativeElement.currentTime;
+    if (t == null) return;
+    this.loopA.set(t);
+    if (this.loopB() !== null && this.loopB()! <= t) this.loopB.set(null);
+  }
+
+  protected markB(): void {
+    const t = this.player()?.nativeElement.currentTime;
+    if (t == null) return;
+    this.loopB.set(t);
+    if (this.loopA() !== null && this.loopA()! >= t) this.loopA.set(null);
+  }
+
+  protected clearLoop(): void {
+    this.loopA.set(null);
+    this.loopB.set(null);
+  }
+
+  /** While an A–B section is set, jump back to A as soon as playback reaches B. */
+  protected onTimeUpdate(player: HTMLMediaElement): void {
+    const a = this.loopA();
+    const b = this.loopB();
+    if (a !== null && b !== null && b > a && player.currentTime >= b) {
+      player.currentTime = a;
+      player.play().catch(() => {});
+    }
+  }
+
+  /** "1:05" from a number of seconds. */
+  protected formatTime(seconds: number): string {
+    const s = Math.max(0, Math.floor(seconds));
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   }
 
   /** The presigned URL may have expired (e.g. the dialog stayed open): get a new one and resume. */

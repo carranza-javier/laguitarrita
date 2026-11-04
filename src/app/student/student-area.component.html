@@ -145,10 +145,10 @@
         </button>
       </header>
       @if (item.type === 'audio') {
-        <audio #player controls autoplay [src]="item.playUrl()"
+        <audio #player controls autoplay [src]="item.playUrl()" (timeupdate)="onTimeUpdate(player)"
                (loadedmetadata)="onPlayerLoaded(player)" (error)="onPlayerError(item, player)"></audio>
       } @else {
-        <video #player controls autoplay playsinline [src]="item.playUrl()"
+        <video #player controls autoplay playsinline [src]="item.playUrl()" (timeupdate)="onTimeUpdate(player)"
                (loadedmetadata)="onPlayerLoaded(player)" (error)="onPlayerError(item, player)"></video>
       }
       <div class="dialog-foot">
@@ -157,6 +157,22 @@
           @for (s of speeds; track s) {
             <button type="button" class="chip" [class.active]="speed() === s" [attr.aria-pressed]="speed() === s"
                     (click)="setSpeed(s)">{{ formatSpeed(s) }}</button>
+          }
+        </div>
+        <div class="loops" role="group" [attr.aria-label]="t().loop.group">
+          <span class="muted small">{{ t().loop.group }}</span>
+          <button type="button" class="chip" [class.active]="loopAll()" [attr.aria-pressed]="loopAll()"
+                  (click)="toggleLoopAll()">
+            <span class="material-icons" aria-hidden="true">repeat</span>{{ t().loop.all }}
+          </button>
+          <button type="button" class="chip" [class.active]="loopA() !== null" [attr.aria-label]="t().loop.setA"
+                  (click)="markA()">A{{ loopA() !== null ? ' ' + formatTime(loopA()!) : '' }}</button>
+          <button type="button" class="chip" [class.active]="loopB() !== null" [attr.aria-label]="t().loop.setB"
+                  (click)="markB()">B{{ loopB() !== null ? ' ' + formatTime(loopB()!) : '' }}</button>
+          @if (loopA() !== null || loopB() !== null) {
+            <button type="button" class="chip" (click)="clearLoop()" [attr.aria-label]="t().loop.clear">
+              <span class="material-icons" aria-hidden="true">close</span>
+            </button>
           }
         </div>
         <div class="foot-actions">

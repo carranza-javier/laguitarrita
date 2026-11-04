@@ -385,7 +385,8 @@ input {
   margin-top: 14px;
 }
 
-.speeds {
+.speeds,
+.loops {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -393,6 +394,18 @@ input {
 
   .small {
     margin-right: 4px;
+  }
+}
+
+.loops {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .material-icons {
+    font-size: 1.05rem;
   }
 }
 

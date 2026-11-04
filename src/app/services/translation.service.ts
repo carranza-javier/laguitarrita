@@ -144,6 +144,14 @@ const TRANSLATIONS = {
       cancel: 'Abbrechen',
       close: 'Schliessen',
       speed: 'Geschwindigkeit',
+      loop: {
+        group: 'Wiederholen',
+        all: 'Ganzes Video',
+        setA: 'Startpunkt A setzen',
+        setB: 'Endpunkt B setzen',
+        clear: 'Wiederholung aufheben',
+        hint: 'A und B setzen, um einen Abschnitt in Schleife zu üben.',
+      },
       noteError: 'Die Notiz konnte nicht gespeichert werden. Bitte versuche es erneut.',
       errors: {
         missing: 'Bitte gib deinen Benutzernamen und dein Passwort ein.',
@@ -297,6 +305,14 @@ const TRANSLATIONS = {
       cancel: 'Cancel',
       close: 'Close',
       speed: 'Speed',
+      loop: {
+        group: 'Loop',
+        all: 'Whole video',
+        setA: 'Set start point A',
+        setB: 'Set end point B',
+        clear: 'Clear loop',
+        hint: 'Set A and B to loop a section while you practise.',
+      },
       noteError: 'The note could not be saved. Please try again.',
       errors: {
         missing: 'Please enter your username and password.',

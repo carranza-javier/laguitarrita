@@ -12,7 +12,13 @@
     "upload-videos": "node scripts/upload-videos.mjs",
     "delete-student": "node scripts/delete-student.mjs",
     "list-students": "node scripts/list-students.mjs",
-    "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs"
+    "list-tickets": "node scripts/list-tickets.mjs",
+    "mark-paid": "node scripts/mark-paid.mjs",
+    "cancel-ticket": "node scripts/cancel-ticket.mjs",
+    "deploy:konzert": "sam build -t konzert/template.yaml && sam deploy --config-file konzert/samconfig.toml",
+    "deploy:konzert:test": "sam build -t konzert/template.yaml && sam deploy --config-file konzert/samconfig.toml --config-env test",
+    "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "test:konzert": "node --test --test-concurrency=1 konzert/tests/*.test.mjs"
   },
   "engines": {
     "node": ">=22"

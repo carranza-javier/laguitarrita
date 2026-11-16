@@ -7,5 +7,9 @@ export const routes: Routes = [
     path: 'schueler',
     loadComponent: () => import('./student/student-area.component').then((m) => m.StudentAreaComponent),
   },
+  {
+    path: 'konzert',
+    loadComponent: () => import('./konzert/konzert.component').then((m) => m.KonzertComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

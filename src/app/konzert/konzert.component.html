@@ -1,0 +1,129 @@
+<header class="bar">
+  <a class="logo" routerLink="/">La Guitarrita</a>
+  <span class="spacer"></span>
+  <button type="button" class="link-btn lang" (click)="ts.toggle()">
+    {{ ts.lang() === 'de' ? 'EN' : 'DE' }}
+  </button>
+</header>
+
+<main class="page">
+  @if (confirmation(); as c) {
+    <!-- ----------------------------------------------------------- Your ticket -->
+    <section class="ticket">
+      <h1>{{ t().ticket.heading }}</h1>
+      <p class="lead">{{ fill(t().ticket.thanks, { name: c.name }) }}</p>
+
+      <dl class="summary">
+        <div><dt>{{ t().ticket.name }}</dt><dd>{{ c.name }}</dd></div>
+        <div><dt>{{ t().ticket.tickets }}</dt><dd>{{ c.tickets }}</dd></div>
+        <div class="total"><dt>{{ t().ticket.total }}</dt><dd>CHF {{ c.amount }}</dd></div>
+      </dl>
+
+      <h2 class="pay-heading">{{ t().ticket.payHeading }}</h2>
+      <ol class="steps">
+        <li>{{ t().ticket.step1 }}</li>
+        <li>{{ t().ticket.step2 }}</li>
+        <li>
+          {{ t().ticket.step3 }}
+          <div class="copy-box">
+            <span class="copy-value">{{ twintNumber() }}</span>
+            <button type="button" class="copy-btn" (click)="copy('number', twintCopyValue())">
+              <span class="material-icons" aria-hidden="true">{{ copied() === 'number' ? 'check' : 'content_copy' }}</span>
+              {{ copied() === 'number' ? t().ticket.copied : t().ticket.copyNumber }}
+            </button>
+          </div>
+        </li>
+        <li>
+          {{ t().ticket.step4 }}
+          <div class="amount-line">
+            <strong>CHF {{ c.amount }}</strong>
+            <span class="muted small">(CHF {{ price() }} {{ t().perTicket }})</span>
+          </div>
+        </li>
+        <li>
+          {{ t().ticket.step5 }}
+          <div class="copy-box reference">
+            <span class="copy-value">{{ c.reference }}</span>
+            <button type="button" class="copy-btn" (click)="copy('text', c.reference)">
+              <span class="material-icons" aria-hidden="true">{{ copied() === 'text' ? 'check' : 'content_copy' }}</span>
+              {{ copied() === 'text' ? t().ticket.copied : t().ticket.copyText }}
+            </button>
+          </div>
+        </li>
+      </ol>
+
+      <p class="note">{{ t().ticket.note }}</p>
+
+      <div class="ticket-actions">
+        <button type="button" class="link-btn accent" (click)="buyAnother()">{{ t().ticket.another }}</button>
+        <a class="link-btn" routerLink="/">{{ t().ticket.home }}</a>
+      </div>
+    </section>
+  } @else {
+    <!-- ----------------------------------------------------------- Buy a ticket -->
+    <section class="intro">
+      <h1>{{ t().heading }}</h1>
+      <p class="lead">{{ t().intro }}</p>
+
+      <dl class="details">
+        @for (row of [t().details.date, t().details.doors, t().details.start, t().details.place]; track row.label) {
+          <div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+        }
+        <div><dt>{{ t().priceLabel }}</dt><dd>CHF {{ price() }} {{ t().perTicket }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="buy">
+      @if (soldOut()) {
+        <div class="availability sold-out" role="status">
+          <strong>{{ t().available.soldOutTitle }}</strong>
+          <p>{{ t().available.soldOut }}</p>
+        </div>
+      } @else {
+        <p class="availability" aria-live="polite">
+          @if (availability(); as a) {
+            {{ fill(t().available.remaining, { n: a.remaining, cap: a.capacity }) }}
+          } @else if (availError()) {
+            {{ t().available.loadError }}
+            <button type="button" class="link-btn accent" (click)="loadAvailability()">{{ t().available.retry }}</button>
+          } @else {
+            {{ t().available.loading }}
+          }
+        </p>
+
+        <form (ngSubmit)="submit()" novalidate>
+          <!-- Honeypot: hidden from people, a magnet for bots. Must stay empty. -->
+          <div class="hp" aria-hidden="true">
+            <label for="website">Website</label>
+            <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" [(ngModel)]="honeypot" />
+          </div>
+
+          <label for="name">{{ t().form.nameLabel }}</label>
+          <input id="name" name="name" type="text" autocomplete="name" [placeholder]="t().form.namePlaceholder"
+                 [(ngModel)]="name" [disabled]="submitting()" />
+
+          <label for="tickets">{{ t().form.ticketsLabel }}</label>
+          <select id="tickets" name="tickets" [(ngModel)]="tickets" [disabled]="submitting()">
+            @for (n of ticketOptions(); track n) {
+              <option [ngValue]="n">{{ n }}</option>
+            }
+          </select>
+
+          @if (formError(); as e) {
+            <p class="error" role="alert">{{ e === 'name' ? t().form.errors.name : t().form.errors[e] }}</p>
+          }
+
+          <button type="submit" class="primary" [disabled]="submitting() || !ticketOptions().length">
+            {{ submitting() ? t().form.submitting : t().form.submit }}
+          </button>
+        </form>
+
+        <p class="privacy">{{ t().form.privacy }}</p>
+      }
+    </section>
+  }
+</main>
+
+<footer class="foot">
+  <a routerLink="/">{{ t().ticket.home }}</a>
+</footer>

@@ -41,12 +41,12 @@ const TRANSLATIONS = {
       cta: 'Jetzt anfragen',
     },
     konzert: {
-      pageTitle: 'Hauskonzert in Bern – Ticket | La Guitarrita',
+      pageTitle: 'Salonkonzert in Bern – Ticket | La Guitarrita',
       metaDescription:
-        'Informelles Flamenco-Hauskonzert mit Javier Carranza am 21. Februar 2027 in Bern. Ticket für CHF 15, Bezahlung per TWINT. Die Plätze sind begrenzt.',
-      heading: 'Hauskonzert',
+        'Salonkonzert in familiärer Atmosphäre mit Javier Carranza am 21. Februar 2027 in Bern. Ticket für CHF 15, Bezahlung per TWINT. Die Plätze sind begrenzt.',
+      heading: 'Salonkonzert',
       intro:
-        'Ein kleines, informelles Flamenco-Konzert. Komm vorbei, hör zu und verbring ein paar schöne Stunden mit spanischer Gitarre.',
+        'Ein Konzert in familiärer Atmosphäre. Komm vorbei und geniesse einen Moment, in dem die Gitarre ganz für sich allein spricht.',
       details: {
         date: { label: 'Datum', value: 'Sonntag, 21. Februar 2027' },
         doors: { label: 'Eintreffen', value: '16.00 Uhr' },
@@ -70,7 +70,7 @@ const TRANSLATIONS = {
         submit: 'Ticket kaufen',
         submitting: 'Einen Moment …',
         privacy:
-          'Wir speichern nur deinen Namen und die Anzahl Tickets, damit wir dich an der Tür finden. Nach dem Konzert werden diese Daten wieder gelöscht.',
+          'Wir speichern nur deinen Namen und die Anzahl Tickets, um zu wissen, wie viele Leute kommen. Ein Nachname ist nicht nötig, und nach dem Konzert werden diese Daten wieder gelöscht.',
         errors: {
           name: 'Bitte gib deinen Namen ein.',
           capacity: 'So viele Tickets sind leider nicht mehr frei.',
@@ -262,12 +262,12 @@ const TRANSLATIONS = {
       cta: 'Get in touch',
     },
     konzert: {
-      pageTitle: 'House concert in Bern – Ticket | La Guitarrita',
+      pageTitle: 'Salon concert in Bern – Ticket | La Guitarrita',
       metaDescription:
-        'Informal flamenco house concert with Javier Carranza on 21 February 2027 in Bern. Ticket for CHF 15, payment by TWINT. Limited places.',
-      heading: 'House concert',
+        'Salon concert in a warm, intimate setting with Javier Carranza on 21 February 2027 in Bern. Ticket for CHF 15, payment by TWINT. Limited places.',
+      heading: 'Salon concert',
       intro:
-        'A small, informal flamenco concert. Come by, listen and spend a few lovely hours with Spanish guitar.',
+        'A concert in a warm, intimate setting. Come by and enjoy a moment where the guitar speaks all on its own.',
       details: {
         date: { label: 'Date', value: 'Sunday, 21 February 2027' },
         doors: { label: 'Doors', value: '4.00 pm' },
@@ -291,7 +291,7 @@ const TRANSLATIONS = {
         submit: 'Buy ticket',
         submitting: 'One moment …',
         privacy:
-          'We only store your name and the number of tickets so we can find you at the door. This data is deleted after the concert.',
+          'We only store your name and the number of tickets to keep track of how many people are coming. A surname is not needed, and this data is deleted after the concert.',
         errors: {
           name: 'Please enter your name.',
           capacity: 'That many tickets are no longer available.',

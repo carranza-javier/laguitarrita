@@ -156,6 +156,76 @@ All resources carry the tag `project=laguitarrita-students`; the AWS budget
 5 USD/month once the tag is activated as a cost allocation tag:
 `aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=project,Status=Active`
 
+## Concert tickets (`/konzert`)
+Public, indexable page to sell tickets for an informal concert. Visitors enter a name and a number of
+tickets (1–4) and get a "Dein Ticket" screen with the exact TWINT payment steps: they pay by sending
+money to the teacher's mobile number (the one in the contact section) with a reference such as
+`Konzert Anna 2`. The site records each ticket and enforces the venue capacity; it never processes a
+payment. German by default, English via the existing selector.
+
+- Region `eu-central-1`, stack `laguitarrita-konzert` (template: `backend/konzert/template.yaml`),
+  completely separate from the student-area stack: its own DynamoDB table and public HTTP API, no
+  Cognito, no S3. The student area is untouched.
+- Concert facts live as template parameters (`Capacity` = 34, `PriceChf` = 15,
+  `ConcertIso` = `2027-02-21T17:00:00+01:00`). The frontend reads the price and the remaining seats
+  from the API; the human-readable date/time/place are texts in `translation.service.ts`.
+- Each ticket row has: `id`, `name`, number of `tickets`, `status` (active/cancelled), `paid`
+  (**informational only — it never affects the capacity or frees a seat**) and `createdAt`. Every
+  active ticket counts towards the capacity the moment it is created, paid or not. A reserved counter
+  row holds the seats taken; a purchase updates the counter and inserts the ticket in a single
+  conditional `TransactWriteItems`, so simultaneous buyers can never exceed the capacity. A TTL field
+  deletes all rows 30 days after the concert.
+- `GET /availability` (public) returns the remaining tickets, capacity and price. `POST /tickets`
+  (public) validates and cleans the input (name length-capped and stripped of anything that could
+  break the reference), enforces the capacity atomically, and is protected by API rate limiting and a
+  honeypot field. CORS is limited to `https://laguitarrita.ch` and `http://localhost:4200`.
+- Public frontend config (API URL and concert facts): `src/app/konzert/konzert-config.ts`. The TWINT
+  number is **not** duplicated there — it is read from the contact section (the single place it lives).
+
+### Ticket admin scripts
+Same requirements as the student scripts (Node 22+, AWS credentials). All accept `--stack <name>`
+(default `laguitarrita-konzert`). Run from `backend/`.
+
+```bash
+cd backend
+
+# Door list: expected reference ("Konzert Anna 2"), name, tickets, expected amount (tickets × CHF 15),
+# paid (yes/no) and date — unpaid first — plus totals (sold, paid, unpaid, available, total expected).
+node scripts/list-tickets.mjs
+node scripts/list-tickets.mjs --out door-list.csv   # export the list as CSV for printing (or --csv to stdout)
+
+# Mark one or more tickets as paid (informational; does NOT change the capacity). A selector can be a
+# ticket id, a buyer name or the full reference text. Use --unpaid to undo. If a name matches several
+# tickets you are asked which one.
+node scripts/mark-paid.mjs "Konzert Anna 2"
+node scripts/mark-paid.mjs "Anna" "beat" --unpaid
+
+# Cancel one or more tickets and free their seats (so they stop counting towards the capacity).
+node scripts/cancel-ticket.mjs <id | name | "Konzert Anna 2"> ...
+```
+
+### Deploying the concert backend
+```bash
+cd backend
+npm run deploy:konzert           # production stack laguitarrita-konzert
+npm run deploy:konzert:test      # throwaway test stack laguitarrita-konzert-test (Capacity 10)
+```
+
+### Tests
+`npm run test:konzert` (in `backend/`, deploy the test stack first) runs integration tests against
+`laguitarrita-konzert-test`: it fires many simultaneous purchases and checks that the capacity is never
+exceeded, that invalid tickets (bad count, empty name, honeypot, non-JSON) are rejected without
+consuming a seat, and that the buyer name is cleaned so it cannot break the TWINT reference.
+
+### Deleting the data after the concert
+Every ticket row is deleted automatically 30 days after the concert (DynamoDB TTL), so normally you do
+nothing. To remove everything earlier, delete the stack — the table and all tickets go with it (unlike
+the student-area bucket, nothing here is retained):
+
+```bash
+aws cloudformation delete-stack --stack-name laguitarrita-konzert
+```
+
 ## Future features (not in scope now)
 - AI chatbot (AWS Bedrock)
 

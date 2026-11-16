@@ -4,7 +4,9 @@
 // (TranslationService contact.phone), the single place the number lives.
 export const KONZERT_CONFIG = {
   apiUrl: 'https://egyep7sdrb.execute-api.eu-central-1.amazonaws.com',
-  url: 'https://laguitarrita.ch/konzert',
+  // GitHub Pages serves the prerendered page at /konzert/ (it 301-redirects /konzert there), so the
+  // canonical and the Event offer URL use the trailing slash: the final, non-redirecting URL.
+  url: 'https://laguitarrita.ch/konzert/',
 
   // Concert facts. The human-readable versions are the texts in translation.service.ts; these
   // machine-readable values feed the price fallback (until /availability answers) and the Event

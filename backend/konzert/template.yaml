@@ -1,0 +1,152 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  laguitarrita.ch public concert tickets: a single DynamoDB table and two public
+  HTTP API routes (GET /availability, POST /tickets). Attendees pay by TWINT directly
+  to the teacher; this stack only records tickets and enforces the venue capacity with
+  an atomic conditional write. Fully separate from the student-area stack.
+
+Parameters:
+  Capacity:
+    Type: Number
+    Default: 34
+    Description: Maximum number of tickets (people) for the venue.
+  PriceChf:
+    Type: Number
+    Default: 15
+    Description: Price per ticket in CHF.
+  ConcertIso:
+    Type: String
+    Default: '2027-02-21T17:00:00+01:00'
+    Description: Concert start (ISO 8601). All ticket data is auto-deleted 30 days after it (TTL).
+  AllowedOrigins:
+    Type: CommaDelimitedList
+    Default: 'https://laguitarrita.ch,http://localhost:4200'
+    Description: Browser origins allowed to call the API (CORS).
+  ThrottleBurst:
+    Type: Number
+    Default: 10
+    Description: API burst limit (anti-spam). Raised in the test stack so concurrency can be tested.
+  ThrottleRate:
+    Type: Number
+    Default: 5
+    Description: API steady request rate per second (anti-spam).
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Architectures: [arm64]
+    MemorySize: 256
+    Timeout: 10
+    Environment:
+      Variables:
+        TICKETS_TABLE: !Ref TicketsTable
+        COUNTER_ID: '#counter'
+        CAPACITY: !Ref Capacity
+        PRICE_CHF: !Ref PriceChf
+        CONCERT_ISO: !Ref ConcertIso
+
+Resources:
+  # One row per ticket (id = uuid) plus one reserved counter row (id = '#counter') that holds the
+  # number of seats taken. Both the counter condition and the ticket insert happen in a single
+  # TransactWriteItems, so concurrent buyers can never push the total past the capacity.
+  TicketsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${AWS::StackName}-tickets
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      # Everything is removed 30 days after the concert.
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  TicketsApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: !Ref AllowedOrigins
+        AllowHeaders: [content-type]
+        AllowMethods: [GET, POST]
+        MaxAge: 3600
+      # Anti-spam: a low throttle on the public routes (per the whole stage).
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: !Ref ThrottleBurst
+        ThrottlingRateLimit: !Ref ThrottleRate
+
+  AvailabilityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-availability
+      CodeUri: src/availability/
+      Handler: index.handler
+      LoggingConfig:
+        LogGroup: !Ref AvailabilityLogGroup
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt TicketsTable.Arn
+      Events:
+        Availability:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /availability
+            Method: GET
+
+  CreateTicketFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-create-ticket
+      CodeUri: src/create-ticket/
+      Handler: index.handler
+      LoggingConfig:
+        LogGroup: !Ref CreateTicketLogGroup
+      Policies:
+        - Statement:
+            # TransactWriteItems over the single table: the counter update + the ticket insert.
+            # GetItem is only used to report the seats left when a purchase is refused.
+            - Effect: Allow
+              Action: [dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:GetItem]
+              Resource: !GetAtt TicketsTable.Arn
+      Events:
+        CreateTicket:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /tickets
+            Method: POST
+
+  AvailabilityLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-availability
+      RetentionInDays: 30
+
+  CreateTicketLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-create-ticket
+      RetentionInDays: 30
+
+Outputs:
+  Region:
+    Value: !Ref AWS::Region
+  ApiUrl:
+    Value: !Sub https://${TicketsApi}.execute-api.${AWS::Region}.amazonaws.com
+  TicketsTableName:
+    Value: !Ref TicketsTable
+  Capacity:
+    Value: !Ref Capacity
+  PriceChf:
+    Value: !Ref PriceChf
+  ConcertIso:
+    Value: !Ref ConcertIso

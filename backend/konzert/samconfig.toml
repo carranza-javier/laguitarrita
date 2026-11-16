@@ -1,0 +1,34 @@
+version = 0.1
+
+[default.global.parameters]
+region = "eu-central-1"
+
+[default.build.parameters]
+cached = true
+
+[default.deploy.parameters]
+stack_name = "laguitarrita-konzert"
+resolve_s3 = true
+s3_prefix = "laguitarrita-konzert"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "project=\"laguitarrita-konzert\""
+
+[test.global.parameters]
+region = "eu-central-1"
+
+[test.build.parameters]
+cached = true
+
+[test.deploy.parameters]
+stack_name = "laguitarrita-konzert-test"
+resolve_s3 = true
+s3_prefix = "laguitarrita-konzert-test"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+# A small capacity so the concurrency test can actually hit the limit, and a high throttle so
+# the burst of concurrent requests is not rejected by the anti-spam rate limit first.
+parameter_overrides = "Capacity=\"10\" ThrottleBurst=\"5000\" ThrottleRate=\"5000\""
+tags = "project=\"laguitarrita-konzert\""

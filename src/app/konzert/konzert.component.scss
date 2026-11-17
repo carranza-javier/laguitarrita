@@ -62,6 +62,14 @@
   box-sizing: border-box;
 }
 
+// The global one-pager rule (section:not(#hero)) adds 80px top/bottom to every
+// <section>. This page is a compact form, not a landing block, so tighten it.
+// The global rule carries an id in its selector, so !important is needed to win.
+.page section {
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+}
+
 h1 {
   font-size: clamp(1.8rem, 4vw, 2.4rem);
   margin-bottom: 0.75rem;
@@ -117,9 +125,12 @@ h1 {
 }
 
 // ---------------------------------------------------------------- availability
+// Live status line (e.g. "Noch 34 von 34 Tickets frei") — availability info,
+// so it gets the accent colour to set it apart from the rest of the copy.
 .availability {
   margin: 0 0 1.5rem;
   font-weight: 500;
+  color: var(--accent);
 }
 
 .sold-out {

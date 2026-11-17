@@ -210,7 +210,7 @@ export class KonzertComponent {
     const data = {
       '@context': 'https://schema.org',
       '@type': 'Event',
-      name: 'Salonkonzert – Flamenco-Gitarre mit Javier Carranza',
+      name: 'Wohnzimmerkonzert – Flamenco-Gitarre mit Javier Carranza',
       startDate: KONZERT_CONFIG.startIso,
       doorTime: KONZERT_CONFIG.doorsIso,
       eventStatus: 'https://schema.org/EventScheduled',

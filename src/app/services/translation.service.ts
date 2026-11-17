@@ -41,10 +41,10 @@ const TRANSLATIONS = {
       cta: 'Jetzt anfragen',
     },
     konzert: {
-      pageTitle: 'Salonkonzert in Bern – Ticket | La Guitarrita',
+      pageTitle: 'Wohnzimmerkonzert in Bern – Ticket | La Guitarrita',
       metaDescription:
-        'Salonkonzert in familiärer Atmosphäre mit Javier Carranza am 21. Februar 2027 in Bern. Ticket für CHF 15, Bezahlung per TWINT. Die Plätze sind begrenzt.',
-      heading: 'Salonkonzert',
+        'Wohnzimmerkonzert in familiärer Atmosphäre mit Javier Carranza am 21. Februar 2027 in Bern. Ticket für CHF 15, Bezahlung per TWINT. Die Plätze sind begrenzt.',
+      heading: 'Wohnzimmerkonzert',
       intro:
         'Ein Konzert in familiärer Atmosphäre. Komm vorbei und geniesse einen Moment, in dem die Gitarre ganz für sich allein spricht.',
       details: {
@@ -262,10 +262,10 @@ const TRANSLATIONS = {
       cta: 'Get in touch',
     },
     konzert: {
-      pageTitle: 'Salon concert in Bern – Ticket | La Guitarrita',
+      pageTitle: 'Living room concert in Bern – Ticket | La Guitarrita',
       metaDescription:
-        'Salon concert in a warm, intimate setting with Javier Carranza on 21 February 2027 in Bern. Ticket for CHF 15, payment by TWINT. Limited places.',
-      heading: 'Salon concert',
+        'Living room concert in a warm, intimate setting with Javier Carranza on 21 February 2027 in Bern. Ticket for CHF 15, payment by TWINT. Limited places.',
+      heading: 'Living room concert',
       intro:
         'A concert in a warm, intimate setting. Come by and enjoy a moment where the guitar speaks all on its own.',
       details: {

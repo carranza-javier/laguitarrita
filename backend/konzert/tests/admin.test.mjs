@@ -127,6 +127,7 @@ describe('admin auth', () => {
     ['POST', '/admin/tickets'],
     ['PATCH', '/admin/tickets/some-id'],
     ['POST', '/admin/tickets/some-id/cancel'],
+    ['DELETE', '/admin/tickets/some-id'],
   ];
 
   for (const [method, path] of routes) {
@@ -224,6 +225,39 @@ describe('admin cancel', () => {
 
     const { tickets } = await (await auth('/admin/tickets')).json();
     assert.equal(tickets.find((t) => t.id === id).status, 'cancelled');
+  });
+});
+
+describe('admin permanent delete', () => {
+  const del = (id) => auth(`/admin/tickets/${id}`, { method: 'DELETE' });
+
+  test('a cancelled ticket can be permanently deleted', async () => {
+    const id = (await (await authJson('/admin/tickets', 'POST', { name: 'Tom', tickets: 2 })).json()).id;
+    await auth(`/admin/tickets/${id}/cancel`, { method: 'POST' });
+
+    const res = await del(id);
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).deleted, true);
+
+    const { tickets } = await (await auth('/admin/tickets')).json();
+    assert.equal(tickets.find((t) => t.id === id), undefined, 'the row is gone');
+  });
+
+  test('an active ticket cannot be deleted and keeps its seats', async () => {
+    const id = (await (await authJson('/admin/tickets', 'POST', { name: 'Keep', tickets: 2 })).json()).id;
+    const res = await del(id);
+    assert.equal(res.status, 409);
+    assert.equal((await res.json()).code, 'notCancelled');
+
+    const { tickets } = await (await auth('/admin/tickets')).json();
+    assert.equal(tickets.find((t) => t.id === id).status, 'active', 'still there');
+    assert.equal((await availability()).remaining, capacity - 2, 'the seats are untouched');
+  });
+
+  test('deleting an unknown id is idempotent', async () => {
+    const res = await del('does-not-exist');
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).deleted, true);
   });
 });
 

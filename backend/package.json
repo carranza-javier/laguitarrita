@@ -15,6 +15,8 @@
     "list-tickets": "node scripts/list-tickets.mjs",
     "mark-paid": "node scripts/mark-paid.mjs",
     "cancel-ticket": "node scripts/cancel-ticket.mjs",
+    "create-concert-admin": "node scripts/create-concert-admin.mjs",
+    "reset-concert-admin-password": "node scripts/reset-concert-admin-password.mjs",
     "deploy:konzert": "sam build -t konzert/template.yaml && sam deploy --config-file konzert/samconfig.toml",
     "deploy:konzert:test": "sam build -t konzert/template.yaml && sam deploy --config-file konzert/samconfig.toml --config-env test",
     "test:integration": "node --test --test-concurrency=1 tests/*.test.mjs",

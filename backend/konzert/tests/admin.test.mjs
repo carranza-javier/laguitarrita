@@ -3,7 +3,7 @@
 //   - every /admin route rejects a missing, malformed or foreign-pool token with 401,
 //   - the capacity can never be exceeded by concurrent manual + public creations,
 //   - cancelling frees seats exactly once (idempotent),
-//   - PATCH rejects fields other than paid/arrived.
+//   - PATCH rejects any field other than paid.
 //
 //   KONZERT_STACK=laguitarrita-konzert-test node --test konzert/tests/admin.test.mjs
 process.env.KONZERT_STACK ||= 'laguitarrita-konzert-test';
@@ -155,17 +155,14 @@ describe('admin list and manual create', () => {
     const created = await (await authJson('/admin/tickets', 'POST', { name: 'Pedro', tickets: 2, paid: true })).json();
     assert.equal(created.reference, 'Konzert Pedro 2');
     assert.equal(created.paid, true);
-    assert.equal(created.arrived, false);
 
     assert.equal((await availability()).remaining, capacity - 2);
 
     const { tickets, totals } = await (await auth('/admin/tickets')).json();
     assert.equal(tickets.length, 1);
     assert.equal(totals.sold, 2);
-    assert.equal(totals.paidSeats, 2);
-    assert.equal(totals.unpaidSeats, 0);
     assert.equal(totals.remaining, capacity - 2);
-    assert.equal(totals.expectedTotal, 2 * totals.price);
+    assert.equal(totals.capacity, capacity);
   });
 
   test('a manual create is refused when it would exceed the capacity', async () => {
@@ -185,21 +182,21 @@ describe('admin patch', () => {
     id = (await (await authJson('/admin/tickets', 'POST', { name: 'Ana', tickets: 1 })).json()).id;
   });
 
-  test('toggles paid and arrived', async () => {
-    const res = await authJson(`/admin/tickets/${id}`, 'PATCH', { paid: true, arrived: true });
-    assert.equal(res.status, 200);
-    const body = await res.json();
-    assert.equal(body.paid, true);
-    assert.equal(body.arrived, true);
+  test('toggles paid on and off', async () => {
+    const on = await authJson(`/admin/tickets/${id}`, 'PATCH', { paid: true });
+    assert.equal(on.status, 200);
+    assert.equal((await on.json()).paid, true);
 
     const { tickets } = await (await auth('/admin/tickets')).json();
-    const t = tickets.find((x) => x.id === id);
-    assert.equal(t.paid, true);
-    assert.equal(t.arrived, true);
+    assert.equal(tickets.find((x) => x.id === id).paid, true);
+
+    const off = await authJson(`/admin/tickets/${id}`, 'PATCH', { paid: false });
+    assert.equal((await off.json()).paid, false);
   });
 
   for (const [label, body] of [
     ['an unknown field', { foo: true }],
+    ['the removed arrived field', { arrived: true }],
     ['the status field', { status: 'cancelled' }],
     ['a non-boolean value', { paid: 'yes' }],
     ['an empty body', {}],
@@ -256,5 +253,39 @@ describe('capacity under mixed concurrency', () => {
     const active = tickets.filter((t) => t.status === 'active');
     assert.equal(active.length, capacity);
     assert.equal(totals.sold, capacity);
+  });
+
+  test('concurrent creations and cancellations keep the counter consistent', async () => {
+    // Fill the venue, then fire a burst of new creations and cancellations of those tickets at once.
+    const ids = [];
+    for (let i = 0; i < capacity; i++) {
+      ids.push((await (await authJson('/admin/tickets', 'POST', { name: `seed-${i}`, tickets: 1 })).json()).id);
+    }
+    assert.equal((await availability()).remaining, 0);
+
+    await Promise.all([
+      ...ids.map((id) => auth(`/admin/tickets/${id}/cancel`, { method: 'POST' })),
+      ...Array.from({ length: capacity }, (_, i) => authJson('/admin/tickets', 'POST', { name: `new-${i}`, tickets: 1 })),
+    ]);
+
+    // Whatever the interleaving, the counter must equal the seats held by active tickets and stay in range.
+    const { tickets, totals } = await (await auth('/admin/tickets')).json();
+    const activeSeats = tickets.filter((t) => t.status === 'active').reduce((n, t) => n + t.tickets, 0);
+    assert.ok(totals.sold >= 0 && totals.sold <= capacity, `sold out of range: ${totals.sold}`);
+    assert.equal(totals.sold, activeSeats, 'the counter matches the active seats');
+    assert.equal((await availability()).remaining, capacity - totals.sold);
+  });
+});
+
+describe('list and cancelled filtering', () => {
+  test('the list returns active and cancelled tickets flagged by status (the UI hides cancelled)', async () => {
+    const keep = (await (await authJson('/admin/tickets', 'POST', { name: 'Active', tickets: 1 })).json()).id;
+    const drop = (await (await authJson('/admin/tickets', 'POST', { name: 'Gone', tickets: 1 })).json()).id;
+    await auth(`/admin/tickets/${drop}/cancel`, { method: 'POST' });
+
+    const { tickets } = await (await auth('/admin/tickets')).json();
+    assert.equal(tickets.find((t) => t.id === keep).status, 'active');
+    assert.equal(tickets.find((t) => t.id === drop).status, 'cancelled');
+    assert.equal(tickets.filter((t) => t.status === 'active').length, 1, 'only one ticket is active');
   });
 });

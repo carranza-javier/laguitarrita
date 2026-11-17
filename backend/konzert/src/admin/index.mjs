@@ -90,14 +90,9 @@ async function listTickets() {
       tickets: Number(r.tickets ?? 0),
       status: r.status ?? 'active',
       paid: !!r.paid,
-      arrived: !!r.arrived,
       reference: r.reference ?? referenceFor(r.name ?? '', Number(r.tickets ?? 0)),
       createdAt: r.createdAt ?? null,
     }));
-
-  const active = tickets.filter((t) => t.status === 'active');
-  const paidSeats = active.filter((t) => t.paid).reduce((n, t) => n + t.tickets, 0);
-  const arrivedSeats = active.filter((t) => t.arrived).reduce((n, t) => n + t.tickets, 0);
 
   return json(200, {
     tickets,
@@ -107,10 +102,6 @@ async function listTickets() {
       currency: 'CHF',
       sold, // seats taken by active tickets
       remaining: Math.max(0, CAPACITY - sold),
-      paidSeats,
-      unpaidSeats: Math.max(0, sold - paidSeats),
-      arrivedSeats,
-      expectedTotal: sold * PRICE_CHF,
     },
   });
 }
@@ -134,7 +125,6 @@ async function createTicket(event) {
   }
 
   const paid = !!body?.paid;
-  const arrived = !!body?.arrived;
   const reference = referenceFor(name, tickets);
 
   const MAX_ATTEMPTS = 10;
@@ -168,7 +158,6 @@ async function createTicket(event) {
                   tickets: { N: String(tickets) },
                   status: { S: 'active' },
                   paid: { BOOL: paid },
-                  arrived: { BOOL: arrived },
                   reference: { S: reference },
                   createdAt: { S: new Date().toISOString() },
                   source: { S: 'admin' },
@@ -186,7 +175,6 @@ async function createTicket(event) {
         tickets,
         status: 'active',
         paid,
-        arrived,
         amount: tickets * PRICE_CHF,
         currency: 'CHF',
         reference,
@@ -218,25 +206,14 @@ async function patchTicket(id, event) {
     return json(400, { message: 'Invalid JSON', code: 'invalid' });
   }
 
-  // Only these two booleans may ever be changed here. Anything else is rejected outright.
-  const allowed = ['paid', 'arrived'];
+  // `paid` is the only field that may be changed here. Anything else is rejected outright.
   const keys = Object.keys(body ?? {});
-  const unknown = keys.filter((k) => !allowed.includes(k));
+  const unknown = keys.filter((k) => k !== 'paid');
   if (unknown.length) {
     return json(400, { message: `Not allowed: ${unknown.join(', ')}`, code: 'invalidField' });
   }
-  if (!keys.length) return json(400, { message: 'Nothing to update', code: 'empty' });
-  if (keys.some((k) => typeof body[k] !== 'boolean')) {
-    return json(400, { message: 'paid and arrived must be booleans', code: 'invalidField' });
-  }
-
-  const sets = [];
-  const names = {};
-  const values = {};
-  for (const k of keys) {
-    sets.push(`#${k} = :${k}`);
-    names[`#${k}`] = k;
-    values[`:${k}`] = { BOOL: body[k] };
+  if (typeof body?.paid !== 'boolean') {
+    return json(400, { message: 'paid must be a boolean', code: 'invalidField' });
   }
 
   try {
@@ -244,15 +221,14 @@ async function patchTicket(id, event) {
       new UpdateItemCommand({
         TableName: TABLE,
         Key: { id: { S: id } },
-        UpdateExpression: `SET ${sets.join(', ')}`,
+        UpdateExpression: 'SET paid = :paid',
         ConditionExpression: 'attribute_exists(id)',
-        ExpressionAttributeNames: names,
-        ExpressionAttributeValues: values,
+        ExpressionAttributeValues: { ':paid': { BOOL: body.paid } },
         ReturnValues: 'ALL_NEW',
       }),
     );
     const t = unmarshall(res.Attributes);
-    return json(200, { id, paid: !!t.paid, arrived: !!t.arrived, status: t.status ?? 'active' });
+    return json(200, { id, paid: !!t.paid, status: t.status ?? 'active' });
   } catch (err) {
     if (err.name === 'ConditionalCheckFailedException') {
       return json(404, { message: 'Not found', code: 'notFound' });

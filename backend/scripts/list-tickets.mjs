@@ -37,18 +37,16 @@ run(async () => {
     tickets: Number(t.tickets),
     amount: Number(t.tickets) * price,
     paid: t.paid ? 'yes' : 'no',
-    // "arrived" (llegada) is false for older tickets that predate the field; treat absent as not arrived.
-    arrived: t.arrived ? 'yes' : 'no',
     date: formatDate(t.createdAt),
   }));
 
   const ticketsSold = active.reduce((n, t) => n + Number(t.tickets), 0);
   const paidTickets = active.filter((t) => t.paid).reduce((n, t) => n + Number(t.tickets), 0);
-  const header = ['Reference', 'Name', 'Tickets', `Amount (CHF)`, 'Paid', 'Arrived', 'Date'];
+  const header = ['Reference', 'Name', 'Tickets', `Amount (CHF)`, 'Paid', 'Date'];
 
   // CSV output (door list).
   if (values.csv || values.out) {
-    const lines = [header, ...rows.map((r) => [r.reference, r.name, r.tickets, r.amount, r.paid, r.arrived, r.date])]
+    const lines = [header, ...rows.map((r) => [r.reference, r.name, r.tickets, r.amount, r.paid, r.date])]
       .map((cols) => cols.map(csvCell).join(','))
       .join('\n');
     if (values.out) {
@@ -64,10 +62,7 @@ run(async () => {
   if (!rows.length) {
     console.log('No active tickets yet.');
   } else {
-    const table = [
-      header,
-      ...rows.map((r) => [r.reference, r.name, String(r.tickets), String(r.amount), r.paid, r.arrived, r.date]),
-    ];
+    const table = [header, ...rows.map((r) => [r.reference, r.name, String(r.tickets), String(r.amount), r.paid, r.date])];
     const widths = header.map((_, c) => Math.max(...table.map((row) => row[c].length)));
     const pad = (row) => row.map((cell, c) => cell.padEnd(widths[c])).join('  ');
     console.log(pad(table[0]));

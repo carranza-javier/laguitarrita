@@ -207,11 +207,18 @@ node scripts/cancel-ticket.mjs <id | name | "Konzert Anna 2"> ...
 The scripts above stay as a backup. Day-to-day the concert is managed from the admin page below.
 
 ### Admin page (`/konzert-admin`)
-A private, mobile-first page to view and manage the ticket list from a phone without running scripts.
-Interface is in Spanish. It lives at `https://laguitarrita.ch/konzert-admin` and is **not linked
-anywhere, carries `noindex, nofollow`, is not in `sitemap.xml`/`robots.txt`, and is kept out of the
-prerender** (see `prerender-routes.txt`); reloading it is served by GitHub Pages' `404.html` fallback.
+A private, deliberately simple, mobile-first page to view and manage the ticket list from a phone
+without running scripts. The interface is in **German by default and English via the DE/EN selector**,
+using the same translation system as the rest of the site. It lives at
+`https://laguitarrita.ch/konzert-admin` and is **not linked anywhere, carries `noindex, nofollow`, is
+not in `sitemap.xml`/`robots.txt`, and is kept out of the prerender** (see `prerender-routes.txt`);
+reloading it is served by GitHub Pages' `404.html` fallback.
 
+- It shows one counter (sold/capacity), a manual-entry button and form, a print button, a
+  "show cancelled" switch, and the list of active tickets (unpaid first). Each ticket shows the name,
+  ticket count, reference, expected amount and age, with just two actions: toggle paid, and cancel
+  (with a confirmation). The list loads on open and again whenever the tab becomes visible — no refresh
+  button and no timer.
 - Auth is a **separate, brand-new Cognito user pool** (`AdminUserPool` in the same concert template),
   fully independent of the student-area pool: username sign-in only, no e-mail/phone, no self-sign-up,
   no messages, 12-character minimum password, case-insensitive username, deletion protection on in
@@ -219,11 +226,11 @@ prerender** (see `prerender-routes.txt`); reloading it is served by GitHub Pages
   **access token** against a JWT authorizer on the `/admin` routes. The public routes are unchanged and
   stay open.
 - Admin API (all require a valid admin access token, otherwise 401; rate-limited): `GET /admin/tickets`
-  (full list + totals), `PATCH /admin/tickets/{id}` (toggle `paid`/`arrived` only), `POST
+  (the list plus the sold/capacity counter), `PATCH /admin/tickets/{id}` (toggles `paid` only), `POST
   /admin/tickets/{id}/cancel` (atomic, idempotent; the admin may cancel paid tickets too) and `POST
   /admin/tickets` (manual entry respecting the capacity with the same atomic conditional write).
-- Each ticket also has an `arrived` boolean (default false), shown in `list-tickets.mjs` too. Older
-  rows without the field count as not arrived.
+  Cancelling marks the ticket cancelled (it is not deleted) and frees its seats once; the TTL still
+  removes every row 30 days after the concert.
 - Admin frontend config (public pool ids, API URL): `src/app/konzert-admin/konzert-admin-config.ts`.
   Nothing secret: the client has no secret and every `/admin` call needs a token.
 

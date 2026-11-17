@@ -84,7 +84,7 @@ Resources:
         # authorization + PATCH are only needed by the private /admin routes; the public
         # routes keep working unchanged (they just ignore the extra allowances).
         AllowHeaders: [content-type, authorization]
-        AllowMethods: [GET, POST, PATCH]
+        AllowMethods: [GET, POST, PATCH, DELETE]
         MaxAge: 3600
       # Anti-spam: a low throttle on every route (per the whole stage).
       DefaultRouteSettings:
@@ -210,7 +210,7 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
-              Action: [dynamodb:Scan, dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem]
+              Action: [dynamodb:Scan, dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
               Resource: !GetAtt TicketsTable.Arn
       Events:
         List:
@@ -243,6 +243,14 @@ Resources:
             ApiId: !Ref TicketsApi
             Path: /admin/tickets/{id}/cancel
             Method: POST
+            Auth:
+              Authorizer: AdminJwt
+        Delete:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /admin/tickets/{id}
+            Method: DELETE
             Auth:
               Authorizer: AdminJwt
 

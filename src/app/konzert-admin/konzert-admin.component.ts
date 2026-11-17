@@ -43,6 +43,7 @@ export class KonzertAdminComponent {
   protected readonly showCancelled = signal(false);
   protected readonly busyIds = signal<Set<string>>(new Set());
   protected readonly confirmingCancel = signal<string | null>(null);
+  protected readonly confirmingDelete = signal<string | null>(null);
 
   // Manual entry form.
   protected readonly manualOpen = signal(false);
@@ -177,6 +178,24 @@ export class KonzertAdminComponent {
   protected async confirmCancel(t: AdminTicket): Promise<void> {
     this.confirmingCancel.set(null);
     await this.mutate(t.id, () => this.apiService.cancel(t.id));
+  }
+
+  // Permanent delete, only offered for already-cancelled tickets (shown via "show cancelled").
+  protected askDelete(id: string): void {
+    this.confirmingDelete.set(id);
+  }
+
+  protected dismissDelete(): void {
+    this.confirmingDelete.set(null);
+  }
+
+  protected async confirmDelete(t: AdminTicket): Promise<void> {
+    this.confirmingDelete.set(null);
+    await this.mutate(t.id, () => this.apiService.remove(t.id));
+  }
+
+  protected deleteText(t: AdminTicket): string {
+    return fill(this.t().confirmDelete, { name: t.name });
   }
 
   /** Runs a mutating call, shows a per-row spinner, then reloads so the counter stays exact. */

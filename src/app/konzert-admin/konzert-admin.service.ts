@@ -56,6 +56,11 @@ export class KonzertAdminService {
     return this.request('POST', `/admin/tickets/${encodeURIComponent(id)}/cancel`);
   }
 
+  /** Permanently deletes a ticket (only cancelled ones are accepted by the server). */
+  remove(id: string): Promise<{ id: string; deleted: boolean }> {
+    return this.request('DELETE', `/admin/tickets/${encodeURIComponent(id)}`);
+  }
+
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const token = await this.auth.accessToken(); // throws AdminAuthError('sessionExpired')
     let res: Response;

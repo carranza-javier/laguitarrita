@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  DeleteItemCommand,
   DynamoDBClient,
   GetItemCommand,
   ScanCommand,
@@ -288,6 +289,37 @@ async function cancelTicket(id) {
   }
 }
 
+// ---------------------------------------------------------------- DELETE /admin/tickets/{id}
+// Hard-deletes a ticket row, but ONLY if it is already cancelled. Active tickets are refused, so a
+// seat can never vanish without first being freed by a cancel. Deleting is idempotent.
+async function deleteTicket(id) {
+  if (!id || id === COUNTER_ID) return json(404, { message: 'Not found', code: 'notFound' });
+
+  const res = await dynamo.send(new GetItemCommand({ TableName: TABLE, Key: { id: { S: id } }, ConsistentRead: true }));
+  if (!res.Item) return json(200, { id, deleted: true, alreadyGone: true }); // already gone
+  if (unmarshall(res.Item).status !== 'cancelled') {
+    return json(409, { message: 'Only cancelled tickets can be deleted', code: 'notCancelled' });
+  }
+
+  try {
+    await dynamo.send(
+      new DeleteItemCommand({
+        TableName: TABLE,
+        Key: { id: { S: id } },
+        ConditionExpression: '#s = :cancelled',
+        ExpressionAttributeNames: { '#s': 'status' },
+        ExpressionAttributeValues: { ':cancelled': { S: 'cancelled' } },
+      }),
+    );
+    return json(200, { id, deleted: true });
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      return json(409, { message: 'Only cancelled tickets can be deleted', code: 'notCancelled' });
+    }
+    throw err;
+  }
+}
+
 export const handler = async (event) => {
   const route = event.routeKey ?? `${event.requestContext?.http?.method} ${event.rawPath}`;
   const id = event.pathParameters?.id;
@@ -301,6 +333,8 @@ export const handler = async (event) => {
         return await patchTicket(id, event);
       case 'POST /admin/tickets/{id}/cancel':
         return await cancelTicket(id);
+      case 'DELETE /admin/tickets/{id}':
+        return await deleteTicket(id);
       default:
         return json(404, { message: 'Not found', code: 'notFound' });
     }

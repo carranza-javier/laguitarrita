@@ -134,6 +134,25 @@
                   </button>
                 </div>
               }
+            } @else {
+              <!-- Cancelled tickets: the only action is a permanent delete (with confirmation). -->
+              @if (confirmingDelete() === t.id) {
+                <div class="confirm">
+                  <span>{{ deleteText(t) }}</span>
+                  <div class="confirm-actions">
+                    <button type="button" class="danger" (click)="confirmDelete(t)" [disabled]="isBusy(t.id)">
+                      {{ this.t().deleteYes }}
+                    </button>
+                    <button type="button" class="link-btn" (click)="dismissDelete()">{{ this.t().confirmNo }}</button>
+                  </div>
+                </div>
+              } @else {
+                <div class="controls">
+                  <button type="button" class="link-btn del" (click)="askDelete(t.id)" [disabled]="isBusy(t.id)">
+                    {{ this.t().delete }}
+                  </button>
+                </div>
+              }
             }
           </li>
         }

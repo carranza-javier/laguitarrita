@@ -22,7 +22,10 @@
           "options": {
             "browser": "src/main.ts",
             "server": "src/main.server.ts",
-            "prerender": true,
+            "prerender": {
+              "discoverRoutes": false,
+              "routesFile": "prerender-routes.txt"
+            },
             "outputPath": "dist/laguitarrita",
             "tsConfig": "tsconfig.app.json",
             "allowedCommonJsDependencies": [

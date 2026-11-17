@@ -30,5 +30,5 @@ confirm_changeset = false
 fail_on_empty_changeset = false
 # A small capacity so the concurrency test can actually hit the limit, and a high throttle so
 # the burst of concurrent requests is not rejected by the anti-spam rate limit first.
-parameter_overrides = "Capacity=\"10\" ThrottleBurst=\"5000\" ThrottleRate=\"5000\""
+parameter_overrides = "Capacity=\"10\" ThrottleBurst=\"5000\" ThrottleRate=\"5000\" Environment=\"test\""
 tags = "project=\"laguitarrita-konzert\""

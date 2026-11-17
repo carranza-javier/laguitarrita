@@ -8,7 +8,6 @@ export interface AdminTicket {
   tickets: number;
   status: 'active' | 'cancelled';
   paid: boolean;
-  arrived: boolean;
   reference: string;
   createdAt: string | null;
 }
@@ -19,10 +18,6 @@ export interface AdminTotals {
   currency: string;
   sold: number;
   remaining: number;
-  paidSeats: number;
-  unpaidSeats: number;
-  arrivedSeats: number;
-  expectedTotal: number;
 }
 
 export interface AdminList {
@@ -53,8 +48,8 @@ export class KonzertAdminService {
     return this.request('POST', '/admin/tickets', { name, tickets, paid });
   }
 
-  setFlags(id: string, flags: { paid?: boolean; arrived?: boolean }): Promise<AdminTicket> {
-    return this.request('PATCH', `/admin/tickets/${encodeURIComponent(id)}`, flags);
+  setPaid(id: string, paid: boolean): Promise<AdminTicket> {
+    return this.request('PATCH', `/admin/tickets/${encodeURIComponent(id)}`, { paid });
   }
 
   cancel(id: string): Promise<{ id: string; status: string }> {

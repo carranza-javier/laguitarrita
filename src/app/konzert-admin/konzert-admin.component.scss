@@ -77,7 +77,6 @@ label {
 
 input[type='text'],
 input[type='password'],
-input[type='search'],
 input[type='number'] {
   width: 100%;
   box-sizing: border-box;
@@ -95,6 +94,32 @@ input[type='number'] {
   }
 }
 
+.link-btn {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 4px;
+
+  &:hover {
+    color: var(--text);
+  }
+  &.lang {
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+  }
+  &.del {
+    color: #a3352a;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
 // ---------------------------------------------------------------- login
 .login {
   max-width: 360px;
@@ -104,7 +129,6 @@ input[type='number'] {
     margin-top: 14px;
   }
 }
-
 .pw {
   display: flex;
   gap: 8px;
@@ -148,74 +172,25 @@ input[type='number'] {
   margin: 12px 0 0;
 }
 
-.link-btn {
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 6px 4px;
-
-  &:hover {
-    color: var(--text);
-  }
-  &.del {
-    color: #a3352a;
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-}
-
-// ---------------------------------------------------------------- offline banner
-.offline {
-  background: #fff6e6;
-  border: 1px solid #e0b057;
-  color: #7a5a12;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  margin-bottom: 14px;
-}
-
-// ---------------------------------------------------------------- totals
-.totals {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+// ---------------------------------------------------------------- counter
+.counter {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 0;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 0 12px;
   margin-bottom: 8px;
-  background: var(--bg);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 
-  div {
-    flex: 1 1 auto;
-    min-width: 72px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 6px 4px;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.03);
-  }
   .big {
-    font-size: 1.1rem;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
     font-weight: 600;
   }
   .lbl {
-    font-size: 0.68rem;
-    color: var(--text-muted);
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .total .big {
-    color: var(--accent);
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
   }
 }
 
@@ -358,6 +333,7 @@ input[type='number'] {
 .controls {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-top: 12px;
 }
@@ -388,12 +364,16 @@ input[type='number'] {
 }
 
 .confirm {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.confirm-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
-  font-size: 0.9rem;
+  margin-top: 10px;
 }
 .danger {
   border: 0;
@@ -443,11 +423,9 @@ input[type='number'] {
   .print-only th:nth-child(2),
   .print-only td:nth-child(2),
   .print-only th:nth-child(3),
-  .print-only td:nth-child(3),
-  .print-only th:nth-child(4),
-  .print-only td:nth-child(4) {
+  .print-only td:nth-child(3) {
     text-align: center;
-    width: 64pt;
+    width: 72pt;
   }
   .box {
     display: inline-block;

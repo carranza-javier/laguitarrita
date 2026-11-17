@@ -1,32 +1,34 @@
 <header class="bar">
   <a class="logo" routerLink="/">La Guitarrita</a>
-  <span class="tag">Administración</span>
+  <span class="tag">{{ t().tag }}</span>
   <span class="spacer"></span>
+  <button type="button" class="link-btn lang" (click)="ts.toggle()">
+    {{ ts.lang() === 'de' ? 'EN' : 'DE' }}
+  </button>
   @if (view() === 'list') {
-    <button type="button" class="link-btn" (click)="logout()">Cerrar sesión</button>
+    <button type="button" class="link-btn" (click)="logout()">{{ t().logout }}</button>
   }
 </header>
 
 <main class="page">
   @if (view() === 'checking') {
-    <p class="muted center">Cargando…</p>
+    <p class="muted center">{{ t().loading }}</p>
   } @else if (view() === 'login') {
     <!-- ------------------------------------------------------------- Login -->
     <section class="login">
-      <h1>Entradas del concierto</h1>
-      <p class="muted">Acceso privado.</p>
+      <h1>{{ t().login.heading }}</h1>
+      <p class="muted">{{ t().login.subtitle }}</p>
       <form (ngSubmit)="login()" novalidate>
-        <label for="user">Usuario</label>
+        <label for="user">{{ t().login.user }}</label>
         <input id="user" name="user" type="text" autocomplete="username" autocapitalize="none"
                [(ngModel)]="username" [disabled]="loginBusy()" />
 
-        <label for="pass">Contraseña</label>
+        <label for="pass">{{ t().login.password }}</label>
         <div class="pw">
           <input id="pass" name="pass" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password"
                  [(ngModel)]="password" [disabled]="loginBusy()" />
-          <button type="button" class="pw-toggle" (click)="showPassword.set(!showPassword())"
-                  [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
-            {{ showPassword() ? 'Ocultar' : 'Ver' }}
+          <button type="button" class="pw-toggle" (click)="showPassword.set(!showPassword())">
+            {{ showPassword() ? t().login.hide : t().login.show }}
           </button>
         </div>
 
@@ -34,60 +36,44 @@
           <p class="error" role="alert">{{ e }}</p>
         }
         <button type="submit" class="primary" [disabled]="loginBusy()">
-          {{ loginBusy() ? 'Entrando…' : 'Entrar' }}
+          {{ loginBusy() ? t().login.submitting : t().login.submit }}
         </button>
       </form>
     </section>
   } @else {
     <!-- ------------------------------------------------------------- List -->
-    @if (!online()) {
-      <div class="offline" role="status">
-        Sin conexión. Mostrando la última lista guardada@if (lastUpdated()) { (actualizada a las {{ clock(lastUpdated()) }}) }.
-        No se pueden hacer cambios hasta recuperar la conexión.
-      </div>
-    }
-
     @if (totals(); as tt) {
-      <section class="totals">
-        <div><span class="big">{{ tt.sold }}/{{ tt.capacity }}</span><span class="lbl">vendidas</span></div>
-        <div><span class="big">{{ tt.paidSeats }}</span><span class="lbl">pagadas</span></div>
-        <div><span class="big">{{ tt.unpaidSeats }}</span><span class="lbl">sin pagar</span></div>
-        <div><span class="big">{{ tt.remaining }}</span><span class="lbl">libres</span></div>
-        <div class="total"><span class="big">CHF {{ tt.expectedTotal }}</span><span class="lbl">esperado</span></div>
+      <section class="counter">
+        <span class="big">{{ tt.sold }}/{{ tt.capacity }}</span>
+        <span class="lbl">{{ t().soldLabel }}</span>
       </section>
     }
 
     <div class="toolbar">
-      <input class="search" name="search" type="search" placeholder="Buscar por nombre…"
-             [ngModel]="query()" (ngModelChange)="query.set($event)" />
       <div class="actions">
-        <button type="button" class="chip" (click)="refresh()" [disabled]="loading()">
-          {{ loading() ? 'Actualizando…' : 'Actualizar' }}
-        </button>
-        <button type="button" class="chip accent" (click)="openManual()" [disabled]="!canEdit()">Entrada manual</button>
-        <button type="button" class="chip" (click)="print()">Imprimir lista</button>
-        <button type="button" class="chip" (click)="exportCsv()">Exportar CSV</button>
+        <button type="button" class="chip accent" (click)="openManual()">{{ t().add }}</button>
+        <button type="button" class="chip" (click)="print()">{{ t().print }}</button>
       </div>
       <label class="switch">
         <input type="checkbox" [checked]="showCancelled()" (change)="showCancelled.set(!showCancelled())" />
-        Ver canceladas @if (cancelledCount()) { ({{ cancelledCount() }}) }
+        {{ t().showCancelled }} @if (cancelledCount()) { ({{ cancelledCount() }}) }
       </label>
     </div>
 
     @if (manualOpen()) {
       <section class="manual">
-        <h2>Entrada manual</h2>
+        <h2>{{ t().add }}</h2>
         <form (ngSubmit)="submitManual()" novalidate>
-          <label for="mname">Nombre</label>
+          <label for="mname">{{ t().manual.name }}</label>
           <input id="mname" name="mname" type="text" [(ngModel)]="manualName" [disabled]="manualBusy()" />
 
-          <label for="mtickets">Número de entradas</label>
+          <label for="mtickets">{{ t().manual.tickets }}</label>
           <input id="mtickets" name="mtickets" type="number" min="1" [max]="capacity()" inputmode="numeric"
                  [(ngModel)]="manualTickets" [disabled]="manualBusy()" />
 
           <label class="check">
             <input type="checkbox" [(ngModel)]="manualPaid" name="mpaid" [disabled]="manualBusy()" />
-            Ya ha pagado
+            {{ t().manual.paid }}
           </label>
 
           @if (manualError(); as e) {
@@ -95,9 +81,11 @@
           }
           <div class="manual-actions">
             <button type="submit" class="primary" [disabled]="manualBusy()">
-              {{ manualBusy() ? 'Guardando…' : 'Añadir' }}
+              {{ manualBusy() ? t().manual.adding : t().manual.add }}
             </button>
-            <button type="button" class="link-btn" (click)="closeManual()" [disabled]="manualBusy()">Cancelar</button>
+            <button type="button" class="link-btn" (click)="closeManual()" [disabled]="manualBusy()">
+              {{ t().manual.cancel }}
+            </button>
           </div>
         </form>
       </section>
@@ -107,44 +95,42 @@
       <p class="error" role="alert">{{ e }}</p>
     }
 
-    @if (filtered().length === 0) {
-      <p class="muted center empty">
-        @if (loading()) { Cargando… } @else if (query().trim()) { Nadie con ese nombre. } @else { Aún no hay entradas. }
-      </p>
+    @if (visible().length === 0) {
+      <p class="muted center empty">{{ t().empty }}</p>
     } @else {
       <ul class="list">
-        @for (t of filtered(); track t.id) {
+        @for (t of visible(); track t.id) {
           <li class="ticket" [class.cancelled]="t.status !== 'active'" [class.unpaid]="t.status === 'active' && !t.paid">
             <div class="head">
               <span class="name">{{ t.name }}</span>
-              <span class="count">{{ t.tickets }} {{ t.tickets === 1 ? 'entrada' : 'entradas' }}</span>
+              <span class="count">{{ ticketsLabel(t) }}</span>
             </div>
             <div class="meta">
               <span class="ref">{{ t.reference }}</span>
               <span class="amt">CHF {{ amount(t) }}</span>
               @if (age(t.createdAt); as a) { <span class="age">· {{ a }}</span> }
-              @if (t.status !== 'active') { <span class="badge">cancelada</span> }
+              @if (t.status !== 'active') { <span class="badge">{{ this.t().cancelledBadge }}</span> }
             </div>
 
             @if (t.status === 'active') {
               @if (confirmingCancel() === t.id) {
                 <div class="confirm">
-                  <span>¿Cancelar esta entrada?</span>
-                  <button type="button" class="danger" (click)="confirmCancel(t)" [disabled]="isBusy(t.id)">Sí, cancelar</button>
-                  <button type="button" class="link-btn" (click)="dismissCancel()">No</button>
+                  <span>{{ confirmText(t) }}</span>
+                  <div class="confirm-actions">
+                    <button type="button" class="danger" (click)="confirmCancel(t)" [disabled]="isBusy(t.id)">
+                      {{ this.t().confirmYes }}
+                    </button>
+                    <button type="button" class="link-btn" (click)="dismissCancel()">{{ this.t().confirmNo }}</button>
+                  </div>
                 </div>
               } @else {
                 <div class="controls">
                   <button type="button" class="toggle" [class.on]="t.paid"
-                          (click)="togglePaid(t)" [disabled]="!canEdit() || isBusy(t.id)">
-                    {{ t.paid ? '✓ Pagada' : 'Pagada' }}
+                          (click)="togglePaid(t)" [disabled]="isBusy(t.id)">
+                    {{ t.paid ? this.t().paidOn : this.t().markPaid }}
                   </button>
-                  <button type="button" class="toggle" [class.on]="t.arrived"
-                          (click)="toggleArrived(t)" [disabled]="!canEdit() || isBusy(t.id)">
-                    {{ t.arrived ? '✓ Ha llegado' : 'Llegada' }}
-                  </button>
-                  <button type="button" class="link-btn del" (click)="askCancel(t.id)" [disabled]="!canEdit() || isBusy(t.id)">
-                    Cancelar
+                  <button type="button" class="link-btn del" (click)="askCancel(t.id)" [disabled]="isBusy(t.id)">
+                    {{ this.t().cancel }}
                   </button>
                 </div>
               }
@@ -158,10 +144,10 @@
 
 <!-- Printable door list: hidden on screen, shown only when printing (B&W, active only, alphabetical). -->
 <div class="print-only">
-  <h1>Konzert · Lista de entrada</h1>
+  <h1>{{ t().printView.title }}</h1>
   <table>
     <thead>
-      <tr><th>Nombre</th><th>Entradas</th><th>Pagada</th><th>Llegada</th></tr>
+      <tr><th>{{ t().printView.name }}</th><th>{{ t().printView.tickets }}</th><th>{{ t().printView.paid }}</th></tr>
     </thead>
     <tbody>
       @for (t of printRows(); track t.id) {
@@ -169,7 +155,6 @@
           <td>{{ t.name }}</td>
           <td>{{ t.tickets }}</td>
           <td><span class="box" [class.checked]="t.paid"></span></td>
-          <td><span class="box" [class.checked]="t.arrived"></span></td>
         </tr>
       }
     </tbody>

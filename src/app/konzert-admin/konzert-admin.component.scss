@@ -1,0 +1,466 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+// Neutralise the global one-pager rule (section:not(#hero) adds 80px top/bottom); it carries an id,
+// so !important is needed. This admin page lays out its own sections.
+.page section {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--navbar-height);
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.logo {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.tag {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.page {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 18px 16px 64px;
+  box-sizing: border-box;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+.center {
+  text-align: center;
+}
+.empty {
+  margin-top: 2rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.4rem;
+}
+h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+input[type='text'],
+input[type='password'],
+input[type='search'],
+input[type='number'] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  color: var(--text);
+
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    border-color: transparent;
+  }
+}
+
+// ---------------------------------------------------------------- login
+.login {
+  max-width: 360px;
+  margin: 8vh auto 0;
+
+  form > label {
+    margin-top: 14px;
+  }
+}
+
+.pw {
+  display: flex;
+  gap: 8px;
+}
+.pw input {
+  flex: 1;
+}
+.pw-toggle {
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.primary {
+  margin-top: 18px;
+  width: 100%;
+  padding: 13px 20px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.error {
+  color: #a3352a;
+  font-size: 0.9rem;
+  margin: 12px 0 0;
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 4px;
+
+  &:hover {
+    color: var(--text);
+  }
+  &.del {
+    color: #a3352a;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+// ---------------------------------------------------------------- offline banner
+.offline {
+  background: #fff6e6;
+  border: 1px solid #e0b057;
+  color: #7a5a12;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+// ---------------------------------------------------------------- totals
+.totals {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  margin-bottom: 8px;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+  div {
+    flex: 1 1 auto;
+    min-width: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 4px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.03);
+  }
+  .big {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .lbl {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .total .big {
+    color: var(--accent);
+  }
+}
+
+// ---------------------------------------------------------------- toolbar
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--text);
+
+  &.accent {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin: 0;
+}
+.switch input {
+  width: 18px;
+  height: 18px;
+}
+
+// ---------------------------------------------------------------- manual entry
+.manual {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-weight: 400;
+  }
+  .check input {
+    width: 18px;
+    height: 18px;
+  }
+}
+.manual-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.manual-actions .primary {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+// ---------------------------------------------------------------- list
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ticket {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-left: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fff;
+
+  &.unpaid {
+    border-left-color: var(--accent);
+  }
+  &.cancelled {
+    opacity: 0.55;
+  }
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.meta .ref {
+  font-family: var(--font-heading);
+}
+.meta .amt {
+  font-weight: 500;
+  color: var(--text);
+}
+.badge {
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.toggle {
+  flex: 1 1 auto;
+  min-height: 42px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text);
+
+  &.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+.controls .del {
+  flex: 0 0 auto;
+}
+
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+.danger {
+  border: 0;
+  border-radius: 8px;
+  background: #a3352a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+// ---------------------------------------------------------------- print
+.print-only {
+  display: none;
+}
+
+@media print {
+  .bar,
+  .page {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+    color: #000;
+  }
+  .print-only h1 {
+    font-size: 18pt;
+    margin-bottom: 12pt;
+  }
+  .print-only table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+  }
+  .print-only th,
+  .print-only td {
+    border: 1px solid #000;
+    padding: 6pt 8pt;
+    text-align: left;
+  }
+  .print-only th:nth-child(2),
+  .print-only td:nth-child(2),
+  .print-only th:nth-child(3),
+  .print-only td:nth-child(3),
+  .print-only th:nth-child(4),
+  .print-only td:nth-child(4) {
+    text-align: center;
+    width: 64pt;
+  }
+  .box {
+    display: inline-block;
+    width: 14pt;
+    height: 14pt;
+    border: 1.5pt solid #000;
+    vertical-align: middle;
+  }
+  .box.checked::after {
+    content: '✓';
+    display: block;
+    text-align: center;
+    line-height: 12pt;
+    font-size: 11pt;
+  }
+}

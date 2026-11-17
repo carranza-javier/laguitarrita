@@ -11,5 +11,11 @@ export const routes: Routes = [
     path: 'konzert',
     loadComponent: () => import('./konzert/konzert.component').then((m) => m.KonzertComponent),
   },
+  {
+    // Private admin page: no link points here, it is kept out of the prerender (see
+    // prerender-routes.txt) and carries noindex,nofollow. Reloads are served by 404.html.
+    path: 'konzert-admin',
+    loadComponent: () => import('./konzert-admin/konzert-admin.component').then((m) => m.KonzertAdminComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

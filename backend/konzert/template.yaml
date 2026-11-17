@@ -31,6 +31,14 @@ Parameters:
     Type: Number
     Default: 5
     Description: API steady request rate per second (anti-spam).
+  Environment:
+    Type: String
+    AllowedValues: [prod, test]
+    Default: prod
+    Description: "prod enables deletion protection on the admin user pool; test leaves it off so the test stack can be deleted."
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
 
 Globals:
   Function:
@@ -73,13 +81,26 @@ Resources:
     Properties:
       CorsConfiguration:
         AllowOrigins: !Ref AllowedOrigins
-        AllowHeaders: [content-type]
-        AllowMethods: [GET, POST]
+        # authorization + PATCH are only needed by the private /admin routes; the public
+        # routes keep working unchanged (they just ignore the extra allowances).
+        AllowHeaders: [content-type, authorization]
+        AllowMethods: [GET, POST, PATCH]
         MaxAge: 3600
-      # Anti-spam: a low throttle on the public routes (per the whole stage).
+      # Anti-spam: a low throttle on every route (per the whole stage).
       DefaultRouteSettings:
         ThrottlingBurstLimit: !Ref ThrottleBurst
         ThrottlingRateLimit: !Ref ThrottleRate
+      # A JWT authorizer for the admin pool. It is NOT the default authorizer, so the public
+      # routes (/availability, /tickets) stay open; only the /admin routes opt in to it below.
+      # Access tokens are used: API Gateway matches the token's client_id against the audience.
+      Auth:
+        Authorizers:
+          AdminJwt:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${AdminUserPool}
+              audience:
+                - !Ref AdminUserPoolClient
 
   AvailabilityFunction:
     Type: AWS::Serverless::Function
@@ -125,6 +146,112 @@ Resources:
             Path: /tickets
             Method: POST
 
+  # ---------------------------------------------------------------- Admin auth
+  # A brand-new user pool, fully separate from the student-area pool. Sign-in by username only:
+  # no e-mail/phone, nothing verified, no self-sign-up, no messages. A single admin user is created
+  # by the backend/scripts/create-concert-admin script. Deletion protection is on in prod.
+  AdminUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AWS::StackName}-admin
+      UserPoolTier: LITE
+      DeletionProtection: !If [IsProd, ACTIVE, INACTIVE]
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      UsernameConfiguration:
+        CaseSensitive: false
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: admin_only
+            Priority: 1
+      MfaConfiguration: 'OFF'
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: false
+          RequireUppercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          TemporaryPasswordValidityDays: 7
+
+  AdminUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${AWS::StackName}-admin-web
+      UserPoolId: !Ref AdminUserPool
+      GenerateSecret: false
+      # SRP only: the password itself never leaves the browser.
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      SupportedIdentityProviders: [COGNITO]
+      AuthSessionValidity: 3
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 12
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: hours
+
+  # ---------------------------------------------------------------- Admin API
+  # One function serving every /admin route (list, create, patch, cancel). All routes require a
+  # valid access token from AdminUserPool; without it API Gateway answers 401 before the Lambda runs.
+  AdminFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-admin
+      CodeUri: src/admin/
+      Handler: index.handler
+      LoggingConfig:
+        LogGroup: !Ref AdminLogGroup
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:Scan, dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem]
+              Resource: !GetAtt TicketsTable.Arn
+      Events:
+        List:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /admin/tickets
+            Method: GET
+            Auth:
+              Authorizer: AdminJwt
+        Create:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /admin/tickets
+            Method: POST
+            Auth:
+              Authorizer: AdminJwt
+        Patch:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /admin/tickets/{id}
+            Method: PATCH
+            Auth:
+              Authorizer: AdminJwt
+        Cancel:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TicketsApi
+            Path: /admin/tickets/{id}/cancel
+            Method: POST
+            Auth:
+              Authorizer: AdminJwt
+
+  AdminLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-admin
+      RetentionInDays: 30
+
   AvailabilityLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -150,3 +277,7 @@ Outputs:
     Value: !Ref PriceChf
   ConcertIso:
     Value: !Ref ConcertIso
+  AdminUserPoolId:
+    Value: !Ref AdminUserPool
+  AdminUserPoolClientId:
+    Value: !Ref AdminUserPoolClient

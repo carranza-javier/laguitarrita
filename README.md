@@ -215,10 +215,11 @@ not in `sitemap.xml`/`robots.txt`, and is kept out of the prerender** (see `prer
 reloading it is served by GitHub Pages' `404.html` fallback.
 
 - It shows one counter (sold/capacity), a manual-entry button and form, a print button, a
-  "show cancelled" switch, and the list of active tickets (unpaid first). Each ticket shows the name,
-  ticket count, reference, expected amount and age, with just two actions: toggle paid, and cancel
-  (with a confirmation). The list loads on open and again whenever the tab becomes visible — no refresh
-  button and no timer.
+  "show cancelled" switch, and the list of active tickets (unpaid first). Each active ticket shows the
+  name, ticket count, reference, expected amount and age, with just two actions: toggle paid, and cancel
+  (with a confirmation). With "show cancelled" on, cancelled tickets appear dimmed and offer a single
+  action — permanent delete (with a confirmation); only cancelled tickets can be deleted. The list loads
+  on open and again whenever the tab becomes visible — no refresh button and no timer.
 - Auth is a **separate, brand-new Cognito user pool** (`AdminUserPool` in the same concert template),
   fully independent of the student-area pool: username sign-in only, no e-mail/phone, no self-sign-up,
   no messages, 12-character minimum password, case-insensitive username, deletion protection on in
@@ -227,8 +228,10 @@ reloading it is served by GitHub Pages' `404.html` fallback.
   stay open.
 - Admin API (all require a valid admin access token, otherwise 401; rate-limited): `GET /admin/tickets`
   (the list plus the sold/capacity counter), `PATCH /admin/tickets/{id}` (toggles `paid` only), `POST
-  /admin/tickets/{id}/cancel` (atomic, idempotent; the admin may cancel paid tickets too) and `POST
-  /admin/tickets` (manual entry respecting the capacity with the same atomic conditional write).
+  /admin/tickets/{id}/cancel` (atomic, idempotent; the admin may cancel paid tickets too), `POST
+  /admin/tickets` (manual entry respecting the capacity with the same atomic conditional write) and
+  `DELETE /admin/tickets/{id}` (permanent hard delete, **only for already-cancelled tickets** — active
+  ones are refused so a seat can never vanish unfreed; idempotent).
   Cancelling marks the ticket cancelled (it is not deleted) and frees its seats once; the TTL still
   removes every row 30 days after the concert.
 - Admin frontend config (public pool ids, API URL): `src/app/konzert-admin/konzert-admin-config.ts`.

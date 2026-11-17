@@ -49,9 +49,9 @@ const TRANSLATIONS = {
         'Ein Konzert in familiärer Atmosphäre. Komm vorbei und geniesse einen Moment, in dem die Gitarre ganz für sich allein spricht.',
       details: {
         date: { label: 'Datum', value: 'Sonntag, 21. Februar 2027' },
-        doors: { label: 'Eintreffen', value: '16.00 Uhr' },
+        doors: { label: 'Eintreffen', value: 'ab 16.00 Uhr' },
         start: { label: 'Konzert', value: '17.00 Uhr' },
-        place: { label: 'Ort', value: 'Sulgenrain 24, Bern' },
+        place: { label: 'Ort', value: 'Sulgenrain 14, Bern' },
       },
       priceLabel: 'Preis',
       perTicket: 'pro Ticket',
@@ -346,9 +346,9 @@ const TRANSLATIONS = {
         'A concert in a warm, intimate setting. Come by and enjoy a moment where the guitar speaks all on its own.',
       details: {
         date: { label: 'Date', value: 'Sunday, 21 February 2027' },
-        doors: { label: 'Doors', value: '4.00 pm' },
+        doors: { label: 'Doors', value: 'from 4.00 pm' },
         start: { label: 'Concert', value: '5.00 pm' },
-        place: { label: 'Location', value: 'Sulgenrain 24, Bern' },
+        place: { label: 'Location', value: 'Sulgenrain 14, Bern' },
       },
       priceLabel: 'Price',
       perTicket: 'per ticket',

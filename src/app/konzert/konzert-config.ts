@@ -16,8 +16,8 @@ export const KONZERT_CONFIG = {
   priceChf: 15,
   capacity: 34,
   location: {
-    name: 'Sulgenrain 24',
-    street: 'Sulgenrain 24',
+    name: 'Sulgenrain 14',
+    street: 'Sulgenrain 14',
     postalCode: '3007',
     city: 'Bern',
     country: 'CH',

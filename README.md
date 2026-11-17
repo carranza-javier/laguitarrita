@@ -204,6 +204,37 @@ node scripts/mark-paid.mjs "Anna" "beat" --unpaid
 node scripts/cancel-ticket.mjs <id | name | "Konzert Anna 2"> ...
 ```
 
+The scripts above stay as a backup. Day-to-day the concert is managed from the admin page below.
+
+### Admin page (`/konzert-admin`)
+A private, mobile-first page to view and manage the ticket list from a phone without running scripts.
+Interface is in Spanish. It lives at `https://laguitarrita.ch/konzert-admin` and is **not linked
+anywhere, carries `noindex, nofollow`, is not in `sitemap.xml`/`robots.txt`, and is kept out of the
+prerender** (see `prerender-routes.txt`); reloading it is served by GitHub Pages' `404.html` fallback.
+
+- Auth is a **separate, brand-new Cognito user pool** (`AdminUserPool` in the same concert template),
+  fully independent of the student-area pool: username sign-in only, no e-mail/phone, no self-sign-up,
+  no messages, 12-character minimum password, case-insensitive username, deletion protection on in
+  prod. A single admin user. Sign-in is SRP (the password never leaves the browser); the page uses the
+  **access token** against a JWT authorizer on the `/admin` routes. The public routes are unchanged and
+  stay open.
+- Admin API (all require a valid admin access token, otherwise 401; rate-limited): `GET /admin/tickets`
+  (full list + totals), `PATCH /admin/tickets/{id}` (toggle `paid`/`arrived` only), `POST
+  /admin/tickets/{id}/cancel` (atomic, idempotent; the admin may cancel paid tickets too) and `POST
+  /admin/tickets` (manual entry respecting the capacity with the same atomic conditional write).
+- Each ticket also has an `arrived` boolean (default false), shown in `list-tickets.mjs` too. Older
+  rows without the field count as not arrived.
+- Admin frontend config (public pool ids, API URL): `src/app/konzert-admin/konzert-admin-config.ts`.
+  Nothing secret: the client has no secret and every `/admin` call needs a token.
+
+Create or reset the single admin user (run from `backend/`, needs AWS credentials):
+
+```bash
+cd backend
+node scripts/create-concert-admin.mjs --username <name>          # asks for the password (min 12) without echo
+node scripts/reset-concert-admin-password.mjs --username <name>  # set a new password, signs out everywhere
+```
+
 ### Deploying the concert backend
 ```bash
 cd backend
@@ -220,9 +251,11 @@ consuming a seat, and that the buyer name is cleaned so it cannot break the TWIN
 ### Deleting the data after the concert
 Every ticket row is deleted automatically 30 days after the concert (DynamoDB TTL), so normally you do
 nothing. To remove everything earlier, delete the stack — the table and all tickets go with it (unlike
-the student-area bucket, nothing here is retained):
+the student-area bucket, nothing here is retained). The admin user pool has **deletion protection** in
+prod, so disable it first, then delete the stack (this also removes the admin pool and its user):
 
 ```bash
+aws cognito-idp update-user-pool --user-pool-id <AdminUserPoolId> --deletion-protection INACTIVE --region eu-central-1
 aws cloudformation delete-stack --stack-name laguitarrita-konzert
 ```
 

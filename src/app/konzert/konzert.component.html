@@ -118,6 +118,11 @@
           </button>
         </form>
 
+        <p class="cash-hint">
+          {{ t().noTwint }}
+          <a [href]="whatsappUrl()" target="_blank" rel="noopener noreferrer">{{ t().noTwintLink }}</a>
+        </p>
+
         <p class="privacy">{{ t().form.privacy }}</p>
       }
     </section>

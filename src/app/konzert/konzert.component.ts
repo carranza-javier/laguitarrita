@@ -42,6 +42,12 @@ export class KonzertComponent {
   protected readonly twintNumber = computed(() => this.ts.t().contact.phone);
   protected readonly twintCopyValue = computed(() => this.twintNumber().replace(/\s+/g, ''));
 
+  /** WhatsApp link for visitors without TWINT: the same contact number in international format
+   *  (digits only, no "+" or spaces) plus a prefilled message. Nothing is stored in the database. */
+  protected readonly whatsappUrl = computed(
+    () => `https://wa.me/${this.twintNumber().replace(/\D/g, '')}?text=${encodeURIComponent(this.t().whatsappMessage)}`,
+  );
+
   protected readonly price = computed(() => this.availability()?.price ?? KONZERT_CONFIG.priceChf);
   protected readonly soldOut = computed(() => this.availability()?.soldOut ?? false);
 

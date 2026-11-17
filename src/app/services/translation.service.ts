@@ -55,6 +55,11 @@ const TRANSLATIONS = {
       },
       priceLabel: 'Preis',
       perTicket: 'pro Ticket',
+      noTwint:
+        'Kein TWINT? Schreib mir kurz per WhatsApp, dann reserviere ich dir dein Ticket. Bezahlt wird bar am Eingang.',
+      noTwintLink: 'Per WhatsApp schreiben',
+      whatsappMessage:
+        'Hallo Javier, ich habe kein TWINT und möchte gerne Tickets für das Wohnzimmerkonzert am 21. Februar reservieren. Name: , Anzahl Tickets: ',
       available: {
         remaining: 'Noch {n} von {cap} Tickets frei',
         loading: 'Verfügbarkeit wird geladen …',
@@ -276,6 +281,11 @@ const TRANSLATIONS = {
       },
       priceLabel: 'Price',
       perTicket: 'per ticket',
+      noTwint:
+        "No TWINT? Send me a quick WhatsApp message and I'll reserve your ticket. You pay cash at the entrance.",
+      noTwintLink: 'Message on WhatsApp',
+      whatsappMessage:
+        "Hi Javier, I don't have TWINT and would like to reserve tickets for the living room concert on 21 February. Name: , Number of tickets: ",
       available: {
         remaining: '{n} of {cap} tickets left',
         loading: 'Loading availability …',

@@ -55,8 +55,9 @@ const TRANSLATIONS = {
       },
       priceLabel: 'Preis',
       perTicket: 'pro Ticket',
+      noTwintLead: 'Kein TWINT?',
       noTwint:
-        'Kein TWINT? Schreib mir kurz per WhatsApp, dann reserviere ich dir dein Ticket. Bezahlt wird bar am Eingang.',
+        'Schreib mir kurz per WhatsApp, dann reserviere ich dir dein Ticket. Bezahlt wird bar am Eingang.',
       noTwintLink: 'Per WhatsApp schreiben',
       whatsappMessage:
         'Hallo Javier, ich habe kein TWINT und möchte gerne Tickets für das Wohnzimmerkonzert am 21. Februar reservieren. Name: , Anzahl Tickets: ',
@@ -72,7 +73,7 @@ const TRANSLATIONS = {
         nameLabel: 'Name',
         namePlaceholder: 'Dein Name',
         ticketsLabel: 'Anzahl Tickets',
-        submit: 'Ticket kaufen',
+        submit: 'Ticket mit TWINT kaufen',
         submitting: 'Einen Moment …',
         privacy:
           'Wir speichern nur deinen Namen und die Anzahl Tickets, um zu wissen, wie viele Leute kommen. Ein Nachname ist nicht nötig, und nach dem Konzert werden diese Daten wieder gelöscht.',
@@ -281,8 +282,9 @@ const TRANSLATIONS = {
       },
       priceLabel: 'Price',
       perTicket: 'per ticket',
+      noTwintLead: 'No TWINT?',
       noTwint:
-        "No TWINT? Send me a quick WhatsApp message and I'll reserve your ticket. You pay cash at the entrance.",
+        "Send me a quick WhatsApp message and I'll reserve your ticket. You pay cash at the entrance.",
       noTwintLink: 'Message on WhatsApp',
       whatsappMessage:
         "Hi Javier, I don't have TWINT and would like to reserve tickets for the living room concert on 21 February. Name: , Number of tickets: ",
@@ -298,7 +300,7 @@ const TRANSLATIONS = {
         nameLabel: 'Name',
         namePlaceholder: 'Your name',
         ticketsLabel: 'Number of tickets',
-        submit: 'Buy ticket',
+        submit: 'Buy ticket with TWINT',
         submitting: 'One moment …',
         privacy:
           'We only store your name and the number of tickets to keep track of how many people are coming. A surname is not needed, and this data is deleted after the concert.',

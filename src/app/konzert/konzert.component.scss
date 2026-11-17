@@ -242,6 +242,13 @@ select {
   color: var(--text-muted);
   line-height: 1.5;
 
+  // "Kein TWINT?" / "No TWINT?": bold and in a slightly darker terracotta than --accent, so it keeps
+  // enough contrast on the #f0efed background at this small size (the rest stays muted).
+  .lead {
+    font-weight: 600;
+    color: #9f4a34;
+  }
+
   a {
     color: var(--accent);
     font-weight: 500;

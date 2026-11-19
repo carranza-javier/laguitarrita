@@ -12,6 +12,17 @@ const HOME_URL = 'https://laguitarrita.ch/';
 const STORAGE_KEY = 'konzert-ticket-v1';
 const JSONLD_ID = 'konzert-event-jsonld';
 
+// Open Graph / Twitter tags this page overrides, then restores to the home values on leave.
+const SHARE_SELECTORS = [
+  'property="og:url"',
+  'property="og:title"',
+  'property="og:description"',
+  'property="og:image"',
+  'name="twitter:title"',
+  'name="twitter:description"',
+  'name="twitter:image"',
+];
+
 type FormError = KonzertErrorCode | 'name';
 
 @Component({
@@ -37,6 +48,9 @@ export class KonzertComponent {
   protected name = '';
   protected tickets = 1;
   protected honeypot = '';
+
+  protected readonly flyer = KONZERT_CONFIG.flyer;
+  protected readonly contacts = KONZERT_CONFIG.contacts;
 
   /** The TWINT number lives only in the contact section; shown as-is, copied without spaces. */
   protected readonly twintNumber = computed(() => this.ts.t().contact.phone);
@@ -185,17 +199,36 @@ export class KonzertComponent {
     const title = inject(Title);
     const canonical = this.ensureCanonical();
 
+    // Remember the home head so client-side navigation back to "/" restores it unchanged.
+    const homeDescription = meta.getTag('name="description"')?.content ?? '';
+    const ogRestore: [string, string][] = SHARE_SELECTORS.map((sel) => [sel, meta.getTag(sel)?.content ?? '']);
+
     effect(() => {
       const k = this.t();
       title.setTitle(k.pageTitle);
       meta.updateTag({ name: 'description', content: k.metaDescription });
       canonical.href = KONZERT_CONFIG.url;
+
+      // Open Graph / Twitter: a concert-specific title, description and the poster, so links
+      // shared on WhatsApp and social show the event rather than the home preview.
+      meta.updateTag({ property: 'og:url', content: KONZERT_CONFIG.url });
+      meta.updateTag({ property: 'og:title', content: k.ogTitle });
+      meta.updateTag({ property: 'og:description', content: k.ogDescription });
+      meta.updateTag({ property: 'og:image', content: KONZERT_CONFIG.flyer.ogImage });
+      meta.updateTag({ name: 'twitter:title', content: k.ogTitle });
+      meta.updateTag({ name: 'twitter:description', content: k.ogDescription });
+      meta.updateTag({ name: 'twitter:image', content: KONZERT_CONFIG.flyer.ogImage });
     });
     this.injectEventJsonLd();
 
     inject(DestroyRef).onDestroy(() => {
       title.setTitle(HOME_TITLE);
       canonical.href = HOME_URL;
+      meta.updateTag({ name: 'description', content: homeDescription });
+      for (const [sel, content] of ogRestore) {
+        const el = meta.getTag(sel);
+        if (el) el.content = content;
+      }
       this.doc.getElementById(JSONLD_ID)?.remove();
     });
   }

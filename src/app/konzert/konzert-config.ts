@@ -22,6 +22,24 @@ export const KONZERT_CONFIG = {
     city: 'Bern',
     country: 'CH',
   },
+
+  // Concert poster, served from src/assets/konzert (not hashed). The WebP is shown on the page
+  // (JPG fallback for older browsers); the JPG also serves as the absolute og:image for link
+  // previews. Intrinsic size 1200x1607 is set on the <img> so the layout reserves the space.
+  flyer: {
+    webp: '/assets/konzert-flyer.webp',
+    jpg: '/assets/konzert-flyer.jpg',
+    width: 1200,
+    height: 1607,
+    ogImage: 'https://laguitarrita.ch/assets/konzert-flyer.jpg',
+  },
+
+  // Two contacts shown at the foot of the page. The visible text keeps the Swiss 0xx spacing;
+  // the tel: link uses the international +41 form. Javi's number is the same one used for TWINT.
+  contacts: {
+    venue: { tel: '+41786651092', phone: '078 665 10 92', name: 'Angi' },
+    info: { tel: '+41784495591', phone: '078 449 55 91', name: 'Javi' },
+  },
 } as const;
 
 export const MAX_TICKETS = 4;

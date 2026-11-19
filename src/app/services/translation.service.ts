@@ -46,7 +46,20 @@ const TRANSLATIONS = {
         'Wohnzimmerkonzert in familiärer Atmosphäre mit Javier Carranza am 21. Februar 2027 in Bern. Ticket für CHF 15, Bezahlung per TWINT. Die Plätze sind begrenzt.',
       heading: 'Wohnzimmerkonzert',
       intro:
-        'Ein Konzert in familiärer Atmosphäre. Komm vorbei und geniesse einen Moment, in dem die Gitarre ganz für sich allein spricht.',
+        'Komm vorbei und geniesse ein Konzert, bei dem dich die Flamencogitarre auf eine Reise durch verschiedene klangliche und emotionale Landschaften mitnimmt.',
+      ogTitle: 'Wohnzimmerkonzert, 21. Februar 2027 in Bern',
+      ogDescription:
+        'Flamenco-Gitarre mit Javier Carranza am 21. Februar 2027, Sulgenrain 14, Bern. Ticket CHF 15, Bezahlung per TWINT.',
+      flyerAlt: 'Plakat zum Wohnzimmerkonzert von Javier Carranza am 21. Februar 2027 in Bern',
+      about: {
+        p1: 'In diesem Gitarrensolo lade ich dich ein, mit tiefgründigen Stücken aus dem traditionellen Flamenco und experimentelleren Kompositionen neue emotionale Welten zu entdecken.',
+        p2: 'Ausserdem bietet meine liebe Kollegin Angi für alle, die möchten, einen Apéro und Getränke an.',
+        p3: 'Das Konzert findet direkt im Wohnzimmer von Angi und ihren Mitbewohnerinnen und Mitbewohnern statt. So entsteht eine familiäre, warme und persönliche Atmosphäre, in der Musik und Menschen auf besondere Weise zusammenkommen können.',
+        contactLead:
+          'Hast du Fragen zur Anreise oder möchtest du mehr über den Anlass wissen? Melde dich jederzeit gerne bei uns:',
+        venueLabel: 'Veranstaltungsort und Anreise',
+        infoLabel: 'Informationen und Tickets',
+      },
       details: {
         date: { label: 'Datum', value: 'Sonntag, 21. Februar 2027' },
         doors: { label: 'Eintreffen', value: 'ab 16.00 Uhr' },
@@ -343,7 +356,20 @@ const TRANSLATIONS = {
         'Living room concert in a warm, intimate setting with Javier Carranza on 21 February 2027 in Bern. Ticket for CHF 15, payment by TWINT. Limited places.',
       heading: 'Living room concert',
       intro:
-        'A concert in a warm, intimate setting. Come by and enjoy a moment where the guitar speaks all on its own.',
+        'Come along and enjoy a concert where the flamenco guitar takes you on a journey through different sonic and emotional landscapes.',
+      ogTitle: 'Living room concert, 21 February 2027 in Bern',
+      ogDescription:
+        'Flamenco guitar with Javier Carranza on 21 February 2027, Sulgenrain 14, Bern. Ticket CHF 15, payment by TWINT.',
+      flyerAlt: "Poster for Javier Carranza's living room concert on 21 February 2027 in Bern",
+      about: {
+        p1: 'In this solo guitar programme I invite you to discover new emotional worlds, through profound pieces from traditional flamenco and more experimental compositions.',
+        p2: 'My dear friend Angi will also offer an apéro and drinks for anyone who would like some.',
+        p3: 'The concert takes place right in the living room of Angi and her flatmates. This creates a warm, personal and welcoming atmosphere where music and people can come together in a special way.',
+        contactLead:
+          'Do you have questions about getting there, or would you like to know more about the event? Feel free to get in touch with us anytime:',
+        venueLabel: 'Venue and directions',
+        infoLabel: 'Information and tickets',
+      },
       details: {
         date: { label: 'Date', value: 'Sunday, 21 February 2027' },
         doors: { label: 'Doors', value: 'from 4.00 pm' },

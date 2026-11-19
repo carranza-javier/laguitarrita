@@ -64,16 +64,16 @@
     <section class="intro">
       <h1>{{ t().heading }}</h1>
       <p class="lead">{{ t().intro }}</p>
+    </section>
 
+    <section class="buy">
       <dl class="details">
         @for (row of [t().details.date, t().details.doors, t().details.start, t().details.place]; track row.label) {
           <div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
         }
         <div><dt>{{ t().priceLabel }}</dt><dd>CHF {{ price() }} {{ t().perTicket }}</dd></div>
       </dl>
-    </section>
 
-    <section class="buy">
       @if (soldOut()) {
         <div class="availability sold-out" role="status">
           <strong>{{ t().available.soldOutTitle }}</strong>
@@ -125,6 +125,34 @@
 
         <p class="privacy">{{ t().form.privacy }}</p>
       }
+    </section>
+
+    <!-- Poster below the form (lazy-loaded): shown full width, never cropped. -->
+    <picture class="flyer">
+      <source [srcset]="flyer.webp" type="image/webp" />
+      <img [src]="flyer.jpg" [width]="flyer.width" [height]="flyer.height" [alt]="t().flyerAlt"
+           loading="lazy" decoding="async" />
+    </picture>
+
+    <!-- ----------------------------------------------------------- About & contacts -->
+    <section class="about">
+      <p>{{ t().about.p1 }}</p>
+      <p>{{ t().about.p2 }}</p>
+      <p>{{ t().about.p3 }}</p>
+
+      <p class="contact-lead">{{ t().about.contactLead }}</p>
+      <div class="contacts">
+        <div class="contact">
+          <span class="contact-label">{{ t().about.venueLabel }}</span>
+          <span class="contact-value">{{ contacts.venue.name }},
+            <a [href]="'tel:' + contacts.venue.tel">{{ contacts.venue.phone }}</a></span>
+        </div>
+        <div class="contact">
+          <span class="contact-label">{{ t().about.infoLabel }}</span>
+          <span class="contact-value">{{ contacts.info.name }},
+            <a [href]="'tel:' + contacts.info.tel">{{ contacts.info.phone }}</a></span>
+        </div>
+      </div>
     </section>
   }
 </main>

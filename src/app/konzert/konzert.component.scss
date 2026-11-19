@@ -56,7 +56,7 @@
 .page {
   flex: 1;
   width: 100%;
-  max-width: 560px;
+  max-width: 640px;
   margin: 0 auto;
   padding: 48px 24px 72px;
   box-sizing: border-box;
@@ -252,6 +252,67 @@ select {
   a {
     color: var(--accent);
     font-weight: 500;
+    text-decoration: underline;
+    white-space: nowrap;
+  }
+}
+
+// ---------------------------------------------------------------- flyer (poster)
+// Full available width, never cropped. width/height on the <img> reserve the aspect ratio,
+// so lazy-loading it below the form causes no layout shift.
+.flyer {
+  display: block;
+  margin: 2rem 0;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// ---------------------------------------------------------------- about & contacts
+.about {
+  p {
+    margin: 0 0 1rem;
+    line-height: 1.65;
+  }
+
+  .contact-lead {
+    margin-top: 1.5rem;
+    color: var(--text-muted);
+  }
+}
+
+.contacts {
+  margin-top: 0.5rem;
+}
+
+.contact {
+  padding: 8px 0;
+
+  & + & {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+
+.contact-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.contact-value {
+  font-weight: 500;
+
+  // The phone number is the tap target: give it a comfortable touch area on mobile.
+  a {
+    display: inline-block;
+    padding: 6px 2px;
+    color: var(--accent);
     text-decoration: underline;
     white-space: nowrap;
   }
